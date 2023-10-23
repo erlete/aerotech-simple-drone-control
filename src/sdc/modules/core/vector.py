@@ -11,7 +11,9 @@ Author:
 from __future__ import annotations
 
 import math
-from typing import Any, Union
+from typing import Any, Iterator, Union
+
+import numpy as np
 
 
 class Vector3D:
@@ -66,7 +68,7 @@ class Vector3D:
                 + f" {type(value).__name__} instead"
             )
 
-        self._x = value
+        self._x = float(value)
 
     @property
     def y(self) -> float:
@@ -91,7 +93,7 @@ class Vector3D:
                 + f" {type(value).__name__} instead"
             )
 
-        self._y = value
+        self._y = float(value)
 
     @property
     def z(self) -> float:
@@ -116,7 +118,15 @@ class Vector3D:
                 + f" {type(value).__name__} instead"
             )
 
-        self._z = value
+        self._z = float(value)
+
+    def plot(self, ax, *args, **kwargs) -> None:
+        """Plot the vector.
+
+        Args:
+            ax (Axes3D): axes to plot the vector on.
+        """
+        ax.plot(*[[c, c] for c in self], *args, **kwargs)
 
     def __add__(self, other: Vector3D) -> Vector3D:
         """Add two vectors.
@@ -433,6 +443,14 @@ class Vector3D:
         """
         return 3
 
+    def __iter__(self) -> Iterator:
+        """Get an iterator for the vector.
+
+        Returns:
+            Iterator: iterator for the vector.
+        """
+        return iter((self.x, self.y, self.z))
+
     def __repr__(self) -> str:
         """Get the raw representation of the vector.
 
@@ -448,3 +466,33 @@ class Vector3D:
             str: string representation of the vector.
         """
         return f"({self.x}, {self.y}, {self.z})"
+
+
+class Rotator3D(Vector3D):
+    """3D rotation representation class.
+
+    This class represents a rotation in the 3D space. It can also be used to
+    represent rotations in a cartesian coordinate system.
+
+    Attributes:
+        x (float): X rotation (degrees).
+        y (float): Y rotation (degrees).
+        z (float): Z rotation (degrees).
+    """
+
+    def __init__(
+        self,
+        x: Union[int, float],
+        y: Union[int, float],
+        z: Union[int, float]
+    ) -> None:
+        """Initialize a Rotator3D instance.
+
+        Args:
+            x (Union[int, float]): X rotation (degrees).
+            y (Union[int, float]): Y rotation (degrees).
+            z (Union[int, float]): Z rotation (degrees).
+        """
+        self.x = np.deg2rad(x)
+        self.y = np.deg2rad(y)
+        self.z = np.deg2rad(z)
