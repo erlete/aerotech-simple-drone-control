@@ -65,7 +65,7 @@ class TrackSequenceReader:
         Returns:
             List[Track]: track sequence.
         """
-        return self.track_sequence
+        return self._track_sequence
 
     def read(self) -> List[Track]:
         """Read track sequence file.
