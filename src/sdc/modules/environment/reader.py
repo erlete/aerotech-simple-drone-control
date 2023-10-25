@@ -84,6 +84,7 @@ class TrackSequenceReader:
                     Ring(
                         Vector3D(*ring["position"]),
                         Rotator3D(*ring["rotation"]),
+                        complexity=100
                     )
                     for ring in value["rings"]
                 ]
