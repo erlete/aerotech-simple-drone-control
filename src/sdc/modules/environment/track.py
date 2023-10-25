@@ -181,7 +181,7 @@ class Track:
             [
                 "Start",
                 "End",
-                "Rings"
+                "Ring" if len(self.rings) == 1 else "Rings"
             ]
         )
 
