@@ -7,6 +7,7 @@ Author:
 
 from typing import List
 
+from ..core.gradient import ColorGradient
 from ..core.vector import Vector3D
 from ..geometry.ring import Ring
 
@@ -169,8 +170,21 @@ class Track:
         self.start.plot(ax, "+", color="darkred", **kwargs)
         self.end.plot(ax, "P", color="darkgreen", **kwargs)
 
-        for ring in self.rings:
-            ring.plot(ax, color="darkorange", **kwargs)
+        # Color gradient for rings:
+        gradient = ColorGradient("#ff0000", "#0000ff", len(self.rings))
+        steps = [
+            f"#{step[0]:02x}{step[1]:02x}{step[2]:02x}"
+            for step in gradient.steps
+        ]
+
+        # Ring plotting:
+        for color, ring in zip(steps, self.rings):
+            ring.plot(
+                ax,
+                color=color,
+                edgecolors=color,
+                **kwargs
+            )
 
         # Title, labels and legend:
         ax.set_title("Drone track view")
@@ -180,8 +194,10 @@ class Track:
         ax.legend(
             [
                 "Start",
-                "End",
-                "Ring" if len(self.rings) == 1 else "Rings"
+                "End"
+            ] + [
+                f"Ring {i}"
+                for i in range(1, len(self.rings) + 1)
             ]
         )
 
