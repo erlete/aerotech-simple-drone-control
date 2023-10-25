@@ -122,6 +122,43 @@ class Track:
 
         self._rings = value
 
+    @staticmethod
+    def ax_auto_fit(ax, offset: int = 1, *checkpoints: Vector3D) -> None:
+        """Set axis limits automatically.
+
+        Args:
+            ax (Axes3D): ax to set limits for.
+            offset (int, optional): additional distance margin. Defaults to 1.
+        """
+        x = [checkpoint.x for checkpoint in checkpoints]
+        y = [checkpoint.y for checkpoint in checkpoints]
+        z = [checkpoint.z for checkpoint in checkpoints]
+
+        centers = (
+            (max(x) + min(x)) / 2,
+            (max(y) + min(y)) / 2,
+            (max(z) + min(z)) / 2
+        )
+
+        max_distance = max(
+            abs(max(x) - min(x)) / 2,
+            abs(max(y) - min(y)) / 2,
+            abs(max(z) - min(z)) / 2
+        )
+
+        ax.set_xlim3d(
+            centers[0] - max_distance - offset,
+            centers[0] + max_distance + offset
+        )
+        ax.set_ylim3d(
+            centers[1] - max_distance - offset,
+            centers[1] + max_distance + offset
+        )
+        ax.set_zlim3d(
+            centers[2] - max_distance - offset,
+            centers[2] + max_distance + offset
+        )
+
     def plot(self, ax, **kwargs) -> None:
         """Plot track.
 
@@ -134,6 +171,45 @@ class Track:
 
         for ring in self.rings:
             ring.plot(ax, color="darkorange", **kwargs)
+
+        # Title, labels and legend:
+        ax.set_title("Drone track view")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("Z")
+        ax.legend(
+            [
+                "Start",
+                "End",
+                "Rings"
+            ]
+        )
+
+        # Axis planes background color:
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+
+        # Grid and axis views:
+        # ax.grid(False)  # TODO: Activate this after debugging
+        # ax.set_axis_off()  # TODO: Activate this after debugging
+        ax.set_facecolor((1.0, 1.0, 1.0, 0.0))
+
+        # Projection, aspect and axis scale:
+        ax.set_proj_type("ortho")
+        ax.set_box_aspect((1, 1, 1))
+        ax.set_autoscale_on(False)
+        self.ax_auto_fit(
+            ax,
+            1,
+            self.start,
+            self.end,
+            *[ring.position for ring in self.rings]
+        )
+
+        # View distance and angle:
+        ax.view_init(azim=-135, elev=45)
+        ax.dist = 10
 
     def __repr__(self) -> str:
         """Get short track representation.
