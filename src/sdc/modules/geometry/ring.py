@@ -6,6 +6,18 @@ from ..core.vector import Rotator3D, Vector3D
 
 
 class Ring:
+    """Ring representation class.
+
+    Attributes:
+        position (Vector3D): ring position.
+        rotation (Rotator3D): ring rotation.
+        scale (Vector3D): ring scale.
+        height (float): ring width.
+        hole_radius (float): ring hole radius.
+        complexity (int): ring geometry complexity.
+        surface (Tuple[np.ndarray, np.ndarray, np.ndarray]): ring geometry
+            surface.
+    """
 
     def __init__(
         self,
@@ -16,6 +28,21 @@ class Ring:
         hole_radius: Union[int, float] = 5,
         complexity: int = 50
     ) -> None:
+        """Initialize a Ring instance.
+
+        Args:
+            position (Vector3D, optional): ring position. Defaults to
+                Vector3D(0, 0, 0).
+            rotation (Rotator3D, optional): ring rotation. Defaults to
+                Rotator3D(0, 0, 0).
+            scale (Vector3D, optional): ring scale. Defaults to
+                Vector3D(1, 1, 1).
+            height (Union[int, float], optional): ring width. Defaults to 1.
+            hole_radius (Union[int, float], optional): ring hole radius.
+                Defaults to 5.
+            complexity (int, optional): ring geometry complexity. Defaults to
+                50.
+        """
         self.position = position
         self.rotation = rotation
         self.scale = scale
@@ -185,6 +212,11 @@ class Ring:
         return self._surface
 
     def _compute_geometry(self) -> None:
+        """Compute ring geometry.
+
+        This method builds the ring geometry, scales it, rotates it and
+        translates it to the correct position.
+        """
         theta, phi = np.meshgrid(
             np.linspace(0, 2 * np.pi, self._complexity),  # type: ignore
             np.linspace(0, 2 * np.pi, self._complexity)  # type: ignore
@@ -216,6 +248,11 @@ class Ring:
         self._surface = (x, y, z)
 
     def plot(self, ax, **kwargs) -> None:
+        """Plot ring.
+
+        Args:
+            ax (Axes3D): ax to plot on.
+        """
         kwargs_ = {
             "rstride": 5,
             "cstride": 5,
@@ -230,3 +267,26 @@ class Ring:
         )
 
         self._position.plot(ax, ".", color=kwargs_["color"], ms=10)
+
+    def __repr__(self) -> str:
+        """Get short ring representation.
+
+        Returns:
+            str: short ring representation.
+        """
+        return f"<Ring at {self._position}>"
+
+    def __str__(self) -> str:
+        """Get long ring representation.
+
+        Returns:
+            str: long ring representation.
+        """
+        return f"""Ring(
+    position={self._position},
+    rotation={self._rotation},
+    scale={self._scale},
+    height={self._height},
+    hole_radius={self._hole_radius},
+    complexity={self._complexity}
+)"""
