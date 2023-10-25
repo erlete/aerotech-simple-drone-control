@@ -1,9 +1,33 @@
+"""Color grading generator tools container module.
+
+Author:
+    Paulo Sanchez (@erlete)
+"""
+
+
 from typing import List
 
 
 class ColorGradient:
+    """Color gradient representation class.
 
-    def __init__(self, initial_color, final_color, step_count):
+    This class is used to generate hexadecimal color gradient steps between two
+    colors.
+
+    Attributes:
+        initial_color (str): gradient initial color.
+        final_color (str): gradient final color.
+        step_count (int): gradient step count.
+    """
+
+    def __init__(self, initial_color: str, final_color: str, step_count: int):
+        """Initialize a ColorGradient instance.
+
+        Args:
+            initial_color (str): gradient initial color.
+            final_color (str): gradient final color.
+            step_count (int): gradient step count.
+        """
         self.initial_color = initial_color
         self.final_color = final_color
         self.step_count = step_count
@@ -31,6 +55,12 @@ class ColorGradient:
                 + f" {type(value).__name__} instead"
             )
 
+        if not self.is_valid_hex(value):
+            raise ValueError(
+                f"invalid hex color {value} for"
+                + f" {self.__class__.__name__}.initial_color"
+            )
+
         self._initial_color = value
 
     @property
@@ -54,6 +84,12 @@ class ColorGradient:
                 "expected type str for"
                 + f" {self.__class__.__name__}.final_color but got"
                 + f" {type(value).__name__} instead"
+            )
+
+        if not self.is_valid_hex(value):
+            raise ValueError(
+                f"invalid hex color {value} for"
+                + f" {self.__class__.__name__}.final_color"
             )
 
         self._final_color = value
@@ -91,6 +127,23 @@ class ColorGradient:
             List[List[int]]: gradient steps.
         """
         return self._compute_steps()
+
+    @staticmethod
+    def is_valid_hex(hex_str: str) -> bool:
+        """Check if a string is a valid hex color.
+
+        Args:
+            hex_str (str): string to check.
+
+        Returns:
+            bool: True if the string is a valid hex color, False otherwise.
+        """
+        return (
+            isinstance(hex_str, str)
+            and len(hex_str) == 7
+            and hex_str[0] == "#"
+            and hex_str[1:].isalnum()
+        )
 
     @staticmethod
     def hex_to_rgb(hex_str: str) -> List[int]:
