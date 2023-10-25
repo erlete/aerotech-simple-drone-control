@@ -1,7 +1,7 @@
 {
     "track1": {
-        "droneStart": [0, 0, 0],
-        "droneEnd": [30, 0, 0],
+        "start": [0, 0, 0],
+        "end": [30, 0, 0],
         "rings": [
             {
                 "position": [10, 0, 0],
@@ -14,8 +14,8 @@
         ]
     },
     "track2": {
-        "droneStart": [0, 0, 0],
-        "droneEnd": [20, 20, 20],
+        "start": [0, 0, 0],
+        "end": [20, 20, 20],
         "rings": [
             {
                 "position": [0, 0, 0],
@@ -28,8 +28,8 @@
         ]
     },
     "track3": {
-        "droneStart": [-10, -10, -10],
-        "droneEnd": [20, 20, 20],
+        "start": [-10, -10, -10],
+        "end": [20, 20, 20],
         "rings": [
             {
                 "position": [0, 0, 0],
