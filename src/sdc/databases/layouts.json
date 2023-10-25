@@ -1,43 +1,91 @@
 {
     "track1": {
-        "start": [0, 0, 0],
-        "end": [30, 0, 0],
-        "rings": [
-            {
-                "position": [10, 0, 0],
-                "rotation": [0, 0, 0]
-            },
-            {
-                "position": [20, 0, 5],
-                "rotation": [0, 0, 0]
-            }
-        ]
+        "start": [
+            0,
+            0,
+            0
+        ],
+        "end": [
+            10,
+            0,
+            0
+        ],
+        "rings": []
     },
     "track2": {
-        "start": [0, 0, 0],
-        "end": [20, 20, 20],
+        "start": [
+            0,
+            0,
+            0
+        ],
+        "end": [
+            10,
+            0,
+            2
+        ],
+        "rings": []
+    },
+    "track3": {
+        "start": [
+            0,
+            0,
+            0
+        ],
+        "end": [
+            20,
+            0,
+            0
+        ],
         "rings": [
             {
-                "position": [0, 0, 0],
-                "rotation": [0, 0, 0]
-            },
-            {
-                "position": [10, 10, 10],
-                "rotation": [0, 45, 0]
+                "position": [
+                    10,
+                    2,
+                    0
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ]
             }
         ]
     },
-    "track3": {
-        "start": [-10, -10, -10],
-        "end": [20, 20, 20],
+    "track4": {
+        "start": [
+            0,
+            0,
+            0
+        ],
+        "end": [
+            40,
+            2,
+            -1
+        ],
         "rings": [
             {
-                "position": [0, 0, 0],
-                "rotation": [0, 0, 0]
+                "position": [
+                    10,
+                    0,
+                    2
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ]
             },
             {
-                "position": [10, 10, 10],
-                "rotation": [0, 45, 0]
+                "position": [
+                    20,
+                    5,
+                    -1
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ]
             }
         ]
     }
