@@ -1,4 +1,4 @@
-"""Track utilities container module.
+"""Track utilities module.
 
 Author:
     Paulo Sanchez (@erlete)

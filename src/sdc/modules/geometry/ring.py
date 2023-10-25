@@ -1,3 +1,10 @@
+"""Ring representation module.
+
+Author:
+    Paulo Sanchez (@erlete)
+"""
+
+
 from typing import Tuple, Union
 
 import numpy as np

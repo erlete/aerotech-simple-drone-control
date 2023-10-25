@@ -4,6 +4,7 @@ Author:
     Paulo Sanchez (@erlete)
 """
 
+
 from itertools import cycle
 from typing import List, Union
 
