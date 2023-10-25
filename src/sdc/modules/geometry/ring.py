@@ -266,8 +266,6 @@ class Ring:
             **kwargs_
         )
 
-        self._position.plot(ax, ".", color=kwargs_["color"], ms=10)
-
     def __repr__(self) -> str:
         """Get short ring representation.
 
