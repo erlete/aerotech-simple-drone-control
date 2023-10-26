@@ -5,7 +5,7 @@ Author:
 """
 
 
-from typing import Tuple, Union
+from typing import Union
 
 import numpy as np
 
@@ -19,7 +19,7 @@ class Ring:
         position (Vector3D): ring position.
         rotation (Rotator3D): ring rotation.
         scale (Vector3D): ring scale.
-        height (float): ring width.
+        tube_radius (float): ring tube radius.
         hole_radius (float): ring hole radius.
         complexity (int): ring geometry complexity.
         surface (Tuple[np.ndarray, np.ndarray, np.ndarray]): ring geometry
@@ -31,9 +31,9 @@ class Ring:
         position: Vector3D = Vector3D(0, 0, 0),
         rotation: Rotator3D = Rotator3D(0, 0, 0),
         scale: Vector3D = Vector3D(1, 1, 1),
-        height: Union[int, float] = 1,
+        tube_radius: Union[int, float] = 1,
         hole_radius: Union[int, float] = 5,
-        complexity: int = 50
+        complexity: int = 100
     ) -> None:
         """Initialize a Ring instance.
 
@@ -44,16 +44,17 @@ class Ring:
                 Rotator3D(0, 0, 0).
             scale (Vector3D, optional): ring scale. Defaults to
                 Vector3D(1, 1, 1).
-            height (Union[int, float], optional): ring width. Defaults to 1.
+            tube_radius (Union[int, float], optional): ring tube radius.
+                Defaults to 1.
             hole_radius (Union[int, float], optional): ring hole radius.
                 Defaults to 5.
             complexity (int, optional): ring geometry complexity. Defaults to
-                50.
+                100.
         """
         self.position = position
         self.rotation = rotation
         self.scale = scale
-        self.height = height
+        self.tube_radius = tube_radius
         self.hole_radius = hole_radius
         self.complexity = complexity
 
@@ -135,29 +136,29 @@ class Ring:
         self._scale = value
 
     @property
-    def height(self) -> float:
-        """Get ring height.
+    def tube_radius(self) -> float:
+        """Get ring tube radius.
 
         Returns:
-            float: ring height.
+            float: ring tube radius.
         """
-        return self._height
+        return self._tube_radius
 
-    @height.setter
-    def height(self, value: Union[int, float]) -> None:
-        """Set ring height.
+    @tube_radius.setter
+    def tube_radius(self, value: Union[int, float]) -> None:
+        """Set ring tube radius.
 
         Args:
-            value (Union[int, float]): ring height.
+            value (Union[int, float]): ring tube radius.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
                 "expected type Union[int, float] for"
-                + f" {self.__class__.__name__}.height but got"
+                + f" {self.__class__.__name__}.tube_radius but got"
                 + f" {type(value).__name__} instead"
             )
 
-        self._height = float(value)
+        self._tube_radius = float(value)
 
     @property
     def hole_radius(self) -> float:
@@ -210,11 +211,11 @@ class Ring:
         self._complexity = int(value)
 
     @property
-    def surface(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def surface(self) -> np.ndarray:
         """Get ring geometry surface.
 
         Returns:
-            Tuple[np.ndarray, np.ndarray, np.ndarray]: ring geometry surface.
+            np.ndarray: ring geometry surface.
         """
         return self._surface
 
@@ -229,30 +230,51 @@ class Ring:
             np.linspace(0, 2 * np.pi, self._complexity)  # type: ignore
         )
 
-        x = (self._hole_radius + self._height * np.cos(theta)) * np.cos(phi)
-        y = (self._hole_radius + self._height * np.cos(theta)) * np.sin(phi)
-        z = self._height * np.sin(theta)
+        # X, Y, Z matrix generation:
+        matrix = np.array([
+            (
+                self._hole_radius + self._tube_radius * np.cos(theta)
+            ) * np.cos(phi), (
+                self._hole_radius + self._tube_radius * np.cos(theta)
+            ) * np.sin(phi),
+            self._tube_radius * np.sin(theta)
+        ])
 
+        # Surface rotation:
         azimuth, elevation, yaw = self._rotation
+        rotation_matrix = np.array([
+            [
+                np.cos(azimuth) * np.cos(elevation),
+                (
+                    np.cos(azimuth) * np.sin(elevation) * np.sin(yaw)
+                    - np.sin(azimuth) * np.cos(yaw)
+                ),
+                np.cos(azimuth) * np.sin(elevation) * np.cos(yaw)
+                + np.sin(azimuth) * np.sin(yaw)
+            ], [
+                np.sin(azimuth) * np.cos(elevation),
+                (
+                    np.sin(azimuth) * np.sin(elevation) * np.sin(yaw)
+                    + np.cos(azimuth) * np.cos(yaw)
+                ),
+                np.sin(azimuth) * np.sin(elevation) * np.cos(yaw)
+                - np.cos(azimuth) * np.sin(yaw)
+            ], [
+                -np.sin(elevation),
+                np.cos(elevation) * np.sin(yaw),
+                np.cos(elevation) * np.cos(yaw)
+            ]
+        ])
+        matrix = np.dot(
+            rotation_matrix,
+            matrix.reshape(3, -1)
+        ).reshape(3, self._complexity, self._complexity)
 
-        # FIXME: turn this into a numpy matrix.
-        x, y, z = np.cos(azimuth) * np.cos(elevation) * x + \
-            (np.cos(azimuth) * np.sin(elevation) * np.sin(yaw) - np.sin(azimuth) * np.cos(yaw)) * y + \
-            (np.cos(azimuth) * np.sin(elevation) * np.cos(yaw) + np.sin(azimuth) * np.sin(yaw)) * z, \
-            np.sin(azimuth) * np.cos(elevation) * x + \
-            (np.sin(azimuth) * np.sin(elevation) * np.sin(yaw) + np.cos(azimuth) * np.cos(yaw)) * y + \
-            (np.sin(azimuth) * np.sin(elevation) * np.cos(yaw) - np.cos(azimuth) * np.sin(yaw)) * z, \
-            -np.sin(elevation) * x + np.cos(elevation) * np.sin(yaw) * y + np.cos(elevation) * np.cos(yaw) * z
+        # Surface scaling and translation:
+        matrix[:, :, :] *= np.array([*self.scale]).reshape(3, 1, 1)
+        matrix[:, :, :] += np.array([*self.position]).reshape(3, 1, 1)
 
-        x *= self._scale.x
-        y *= self._scale.y
-        z *= self._scale.z
-
-        x += self._position.x
-        y += self._position.y
-        z += self._position.z
-
-        self._surface = (x, y, z)
+        self._surface = matrix
 
     def plot(self, ax, **kwargs) -> None:
         """Plot ring.
@@ -291,7 +313,7 @@ class Ring:
     position={self._position},
     rotation={self._rotation},
     scale={self._scale},
-    height={self._height},
+    tube_radius={self._tube_radius},
     hole_radius={self._hole_radius},
     complexity={self._complexity}
 )"""
