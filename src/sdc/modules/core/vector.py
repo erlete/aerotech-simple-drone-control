@@ -30,9 +30,9 @@ class Vector3D:
 
     def __init__(
         self,
-        x: Union[int, float],
-        y: Union[int, float],
-        z: Union[int, float]
+        x: Union[int, float] = 0,
+        y: Union[int, float] = 0,
+        z: Union[int, float] = 0
     ) -> None:
         """Initialize a Vector3D instance.
 
@@ -490,9 +490,9 @@ class Rotator3D(Vector3D):
 
     def __init__(
         self,
-        x: Union[int, float],
-        y: Union[int, float],
-        z: Union[int, float]
+        x: Union[int, float] = 0,
+        y: Union[int, float] = 0,
+        z: Union[int, float] = 0
     ) -> None:
         """Initialize a Rotator3D instance.
 
