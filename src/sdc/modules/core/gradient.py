@@ -20,7 +20,12 @@ class ColorGradient:
         step_count (int): gradient step count.
     """
 
-    def __init__(self, initial_color: str, final_color: str, step_count: int):
+    def __init__(
+        self,
+        initial_color: str,
+        final_color: str,
+        step_count: int
+    ) -> None:
         """Initialize a ColorGradient instance.
 
         Args:
