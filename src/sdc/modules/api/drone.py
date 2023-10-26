@@ -12,9 +12,8 @@ from ..geometry.drone import Drone
 
 class DroneAPI:
 
-    def __init__(self, drone, track):
+    def __init__(self, drone):
         self.drone = drone
-        self.track = track
 
 
 class TrackAPI:
