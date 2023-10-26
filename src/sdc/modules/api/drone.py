@@ -4,77 +4,51 @@ Author:
     Paulo Sanchez (@erlete)
 """
 
-from typing import List, Optional
+from typing import Union
 
-from ..environment.track import Track
 from ..geometry.drone import Drone
 
 
 class DroneAPI:
+    """Drone API class.
 
-    def __init__(self, drone):
-        self.drone = drone
+    This class represents a kinematic drone model, implementing the geometry
+    of the drone and adding a speed attribute to it.
 
+    Attributes:
+        drone (Drone): drone.
+        speed (float): drone speed in m/s.
+        SPEED_RANGE (Tuple[int, int]): allowed drone speed range in m/s.
+    """
 
-class TrackAPI:
+    SPEED_RANGE = (0, 20)  # [m/s]
 
-    def __init__(self, track: Track) -> None:
-        self.track = track
-
-        self._is_finished = False
-        self._elapsed = None
-        self._distance_to_end = None
-
-    @property
-    def track(self) -> Track:
-        """Get track.
-
-        Returns:
-            Track: track.
-        """
-        return self._track
-
-    @track.setter
-    def track(self, value: Track) -> None:
-        """Set track.
+    def __init__(self, drone: Drone, speed: Union[int, float] = 0) -> None:
+        """Initialize a DroneAPI instance.
 
         Args:
-            value (Track): track.
+            drone (Drone): drone.
+            speed (Union[int, float], optional): drone speed in m/s. Defaults
+                to 0.
         """
-        if not isinstance(value, Track):
-            raise TypeError(
-                "expected type Track for"
-                + f" {self.__class__.__name__}.track but got"
-                + f" {type(value).__name__} instead"
-            )
-
-        self._track = value
-
-
-
-class FlightAPI:
-
-    def __init__(self, drone: Drone, tracks: List[Track]) -> None:
         self.drone = drone
-        self.tracks = tracks
-
-        self._set_new_track()
+        self.speed = speed
 
     @property
     def drone(self) -> Drone:
-        """Get track drone.
+        """Get drone.
 
         Returns:
-            Drone: track drone.
+            Drone: drone.
         """
         return self._drone
 
     @drone.setter
     def drone(self, value: Drone) -> None:
-        """Set track drone.
+        """Set drone.
 
         Args:
-            value (Drone): track drone.
+            value (Drone): drone.
         """
         if not isinstance(value, Drone):
             raise TypeError(
@@ -86,57 +60,37 @@ class FlightAPI:
         self._drone = value
 
     @property
-    def tracks(self) -> List[Track]:
-        """Get track list.
+    def speed(self) -> float:
+        """Get drone speed.
 
         Returns:
-            List[Track]: track list.
+            float: drone speed.
         """
-        return self._tracks
+        return self._speed
 
-    @tracks.setter
-    def tracks(self, value: List[Track]) -> None:
-        """Set track list.
+    @speed.setter
+    def speed(self, value: Union[int, float]) -> None:
+        """Set drone speed.
 
         Args:
-            value (List[Track]): track list.
+            value (Union[int, float]): drone speed.
         """
-        if not isinstance(value, list):
+        if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type List[Track] for"
-                + f" {self.__class__.__name__}.tracks but got"
+                "expected type Union[int, float] for"
+                + f" {self.__class__.__name__}.speed but got"
                 + f" {type(value).__name__} instead"
             )
 
-        if not value:
-            raise ValueError(
-                f"expected non-empty list for"
-                + f" {self.__class__.__name__}.tracks"
-            )
+        # Limited speed setting:
+        self._speed = float(
+            max(self.SPEED_RANGE[0], min(value, self.SPEED_RANGE[1]))
+        )
 
-        for track in value:
-            if not isinstance(track, Track):
-                raise TypeError(
-                    f"expected type Track for item {track} in"
-                    + f" {self.__class__.__name__}.tracks but got"
-                    + f" {type(value).__name__} instead"
-                )
+    def plot(self, ax) -> None:
+        """Plot drone.
 
-        self._tracks = value
-
-    @property
-    def current_track(self) -> Optional[Track]:
-        """Get current track.
-
-        Returns:
-            Track: current track.
+        Args:
+            ax (Axes3D): ax to plot drone on.
         """
-        return self._current_track
-
-    def _set_new_track(self) -> None:
-        if len(self._tracks) >= 1:
-            self._current_track = self._tracks.pop(0)
-            self._has_next_track = True
-        else:
-            self._current_track = self._tracks.pop(0)
-            self._has_next_track = False
+        self._drone.plot(ax)
