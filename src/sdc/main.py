@@ -1,7 +1,9 @@
 """Main simulation module.
 
 This module contains all simulation code. It imports the Simulation API, which
-allows the user to control a Drone along a set of designed tracks.
+allows the user to control a Drone along a set of designed tracks. The API
+automatically handles track switching, so the information it provides is always
+related to the current track.
 
 Author:
     Paulo Sanchez (@erlete)
@@ -36,11 +38,13 @@ while not sim.is_finished:
 
     """Next waypoint data.
 
-    This element provides information about the location (x, y, z) of the next
-    waypoint of the track. It can either be a Vector3D or None if the end of
-    the track has been reached.
+    The next_waypoint provides information about the location (x, y, z) of the
+    next waypoint of the track. It can either be a Vector3D or None if the end
+    of the track has been reached. On the other hand, the `remaining` element
+    provides information on how many waypoints are left in the track. If it
+    reaches 0, the track is finished.
     """
-    next_wp = sim.next_waypoint
+    next_waypoint, remaining = sim.next_waypoint, sim.remaining_waypoints
 
     # TODO: implement path planning and control logic here.
     #   Set target drone rotation using sim.set_drone_rotation(Rotator3D(...))
