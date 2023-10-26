@@ -4,12 +4,14 @@ Author:
     Paulo Sanchez (@erlete)
 """
 
+
 from typing import Union
 
+from ..core.vector import Rotator3D, Vector3D
 from ..geometry.drone import Drone
 
 
-class DroneAPI:
+class DroneAPI(Drone):
     """Drone API class.
 
     This class represents a kinematic drone model, implementing the geometry
@@ -23,41 +25,21 @@ class DroneAPI:
 
     SPEED_RANGE = (0, 20)  # [m/s]
 
-    def __init__(self, drone: Drone, speed: Union[int, float] = 0) -> None:
+    def __init__(
+        self,
+        position: Vector3D,
+        rotation: Rotator3D,
+        speed: Union[int, float] = 0
+    ) -> None:
         """Initialize a DroneAPI instance.
 
         Args:
-            drone (Drone): drone.
-            speed (Union[int, float], optional): drone speed in m/s. Defaults
-                to 0.
+            position (Vector3D): drone position.
+            rotation (Rotator3D): drone rotation.
+            speed (Union[int, float]): drone speed in m/s.
         """
-        self.drone = drone
+        super().__init__(position, rotation)
         self.speed = speed
-
-    @property
-    def drone(self) -> Drone:
-        """Get drone.
-
-        Returns:
-            Drone: drone.
-        """
-        return self._drone
-
-    @drone.setter
-    def drone(self, value: Drone) -> None:
-        """Set drone.
-
-        Args:
-            value (Drone): drone.
-        """
-        if not isinstance(value, Drone):
-            raise TypeError(
-                "expected type Drone for"
-                + f" {self.__class__.__name__}.drone but got"
-                + f" {type(value).__name__} instead"
-            )
-
-        self._drone = value
 
     @property
     def speed(self) -> float:
@@ -77,20 +59,31 @@ class DroneAPI:
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type float for"
                 + f" {self.__class__.__name__}.speed but got"
                 + f" {type(value).__name__} instead"
             )
 
-        # Limited speed setting:
         self._speed = float(
             max(self.SPEED_RANGE[0], min(value, self.SPEED_RANGE[1]))
         )
 
-    def plot(self, ax) -> None:
-        """Plot drone.
+    def __repr__(self) -> str:
+        """Get short drone representation.
 
-        Args:
-            ax (Axes3D): ax to plot drone on.
+        Returns:
+            str: short drone representation.
         """
-        self._drone.plot(ax)
+        return f"<DroneAPI at {self._position}>"
+
+    def __str__(self) -> str:
+        """Get long drone representation.
+
+        Returns:
+            str: long drone representation.
+        """
+        return f"""DroneAPI(
+    position={self._position},
+    rotation={self._rotation},
+    speed={self._speed}
+)"""
