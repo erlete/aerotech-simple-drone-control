@@ -99,7 +99,11 @@ class Drone:
         self._rotation = value
 
     def plot(self, ax) -> None:
-        """Plot drone."""
+        """Plot drone.
+
+        Args:
+            ax (Axes3D): ax to plot drone on.
+        """
         a = np.array([
             [-1, 1],
             [-1, 1]
