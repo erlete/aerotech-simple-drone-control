@@ -467,6 +467,14 @@ class Vector3D:
         """
         return f"({self.x}, {self.y}, {self.z})"
 
+    def __hash__(self) -> int:
+        """Get the hash of the vector.
+
+        Returns:
+            int: hash of the vector.
+        """
+        return hash((self.x, self.y, self.z))
+
 
 class Rotator3D(Vector3D):
     """3D rotation representation class.
