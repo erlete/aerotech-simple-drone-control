@@ -1,0 +1,3 @@
+[submodule "src/sdc/submodules/pyplot3d"]
+	path = src/sdc/submodules/pyplot3d
+	url = https://github.com/kanishkegb/pyplot-3d.git
