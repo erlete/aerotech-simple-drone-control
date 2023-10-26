@@ -1,21 +1,54 @@
-import matplotlib.pyplot as plt
+"""Main simulation module.
+
+This module contains all simulation code. It imports the Simulation API, which
+allows the user to control a Drone along a set of designed tracks.
+
+Author:
+    Paulo Sanchez (@erlete)
+"""
+
+
+from modules.api.simulation import SimulationAPI
+from modules.core.vector import Rotator3D, Vector3D
 from modules.environment.reader import TrackSequenceReader
 
-reader = TrackSequenceReader("src/sdc/databases/tracks.json")
-tracks = reader.track_sequence
-
-# print(plt.style.available)
-plt.style.use("fast")
-['Solarize_Light2', '_classic_test_patch', '_mpl-gallery', '_mpl-gallery-nogrid', 'bmh', 'classic', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'seaborn-v0_8', 'seaborn-v0_8-bright', 'seaborn-v0_8-colorblind', 'seaborn-v0_8-dark', 'seaborn-v0_8-dark-palette', 'seaborn-v0_8-darkgrid', 'seaborn-v0_8-deep', 'seaborn-v0_8-muted', 'seaborn-v0_8-notebook', 'seaborn-v0_8-paper', 'seaborn-v0_8-pastel', 'seaborn-v0_8-poster', 'seaborn-v0_8-talk', 'seaborn-v0_8-ticks', 'seaborn-v0_8-white', 'seaborn-v0_8-whitegrid', 'tableau-colorblind10']
+TRACKS_DATABASE = "src/sdc/databases/tracks.json"
 
 
-for track in tracks:
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
+# Simulation API definition:
+sim = SimulationAPI(TrackSequenceReader(TRACKS_DATABASE).track_sequence)
 
-    track.plot(ax)
+# Simulation mainloop:
+while not sim.is_finished:
 
-    # turn off the axis planes
-    ax.set_axis_off()
+    """Drone element.
 
-    plt.show()
+    This element represents the dynamic part of the simulation. It provides
+    with several methods that allow the user to get information about the
+    drone's state and control it.
+
+    Attributes:
+        position (Vector3D): current drone position.
+        rotation (Rotator3D): current drone rotation.
+        speed (float): current drone speed.
+    """
+    drone = sim.drone
+
+    """Next waypoint data.
+
+    This element provides information about the location (x, y, z) of the next
+    waypoint of the track. It can either be a Vector3D or None if the end of
+    the track has been reached.
+    """
+    next_wp = sim.next_waypoint
+
+    # TODO: implement path planning and control logic here.
+    #   Set target drone rotation using sim.set_drone_rotation(Rotator3D(...))
+    #   Set target drone speed using sim.set_drone_speed(float(...))
+    #   Note: you can remove this comment once you have implemented the logic.
+
+    # Update simulation state:
+    sim.update()
+
+# Print simulation statistics summary:
+sim.summary()
