@@ -18,6 +18,7 @@ class ColorGradient:
         initial_color (str): gradient initial color.
         final_color (str): gradient final color.
         step_count (int): gradient step count.
+        steps (List[List[int]]): gradient steps.
     """
 
     def __init__(
@@ -131,7 +132,10 @@ class ColorGradient:
         Returns:
             List[List[int]]: gradient steps.
         """
-        return self._compute_steps()
+        return self._compute_steps() if self._step_count > 2 else [
+            self.hex_to_rgb(self._initial_color),
+            self.hex_to_rgb(self._final_color)
+        ]
 
     @staticmethod
     def is_valid_hex(hex_str: str) -> bool:
@@ -151,12 +155,35 @@ class ColorGradient:
         )
 
     @staticmethod
+    def rgb_to_hex(rgb: List[int]) -> str:
+        """Convert an RGB color sequence hex string.
+
+        Args:
+            rgb (List[int]): RGB list.
+
+        Returns:
+            str: hex color string.
+        """
+        return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
+
+    @staticmethod
     def hex_to_rgb(hex_str: str) -> List[int]:
-        """Convert a hex color string to RGB."""
+        """Convert a hex color string to RGB.
+
+        Args:
+            hex_str (str): hex color string.
+
+        Returns:
+            List[int]: RGB list.
+        """
         return [int(hex_str[i:i + 2], 16) for i in range(1, 6, 2)]
 
     def _compute_steps(self) -> List[List[int]]:
-        """Compute gradient steps."""
+        """Compute gradient steps.
+
+        Returns:
+            List[List[int]]: gradient steps.
+        """
         initial_rgb = self.hex_to_rgb(self.initial_color)
         final_rgb = self.hex_to_rgb(self.final_color)
 
