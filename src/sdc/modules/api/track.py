@@ -143,7 +143,7 @@ class TrackAPI:
             float: track timeout.
         """
         return sum(
-            distance3D(*self._track.waypoints[i - 1: i])
+            distance3D(*self._track.waypoints[i - 1: i + 1])
             for i in range(1, len(self._track.waypoints))
         ) * 2 / self.MIN_TIMEOUT_SPEED
 
