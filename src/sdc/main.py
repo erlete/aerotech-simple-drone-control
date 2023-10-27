@@ -55,7 +55,7 @@ while not sim.is_simulation_finished:
     )
 
     # Update simulation state:
-    sim.update(plot=True)
+    sim.update(plot=True, dark_mode=False, fullscreen=True)
 
 # Print simulation statistics summary:
 sim.summary()

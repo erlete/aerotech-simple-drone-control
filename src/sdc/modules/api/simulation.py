@@ -165,19 +165,28 @@ class SimulationAPI:
         self._target_rotation = rotation
         self._target_speed = speed
 
-    def update(self, plot: bool = True) -> None:
+    def update(
+        self,
+        plot: bool = True,
+        dark_mode: bool = False,
+        fullscreen: bool = True
+    ) -> None:
         """Update drone state along the current track and plot environment.
 
         Args:
             plot (bool): whether to plot statistics after each track. Defaults
                 to True.
+            dark_mode (bool): whether to use dark mode for the plot. Defaults
+                to False. Only used if plot is True.
+            fullscreen (bool): whether to plot the figure in fullscreen mode.
+                Defaults to True. Only used if plot is True.
         """
         self._current_timer += self.DT
 
         # Track timeout handling:
         if self._current_timer >= self._current_track.timeout:
             if plot:
-                self.plot()
+                self.plot(dark_mode, fullscreen)
 
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
@@ -194,7 +203,7 @@ class SimulationAPI:
             and self._current_track.is_drone_stopped
         ):
             if plot:
-                self.plot()
+                self.plot(dark_mode, fullscreen)
 
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
@@ -235,8 +244,13 @@ class SimulationAPI:
             speed=self._current_track.drone.speed
         )
 
-    def plot(self) -> None:
-        """Plot simulation environment."""
+    def plot(self, dark_mode: bool, fullscreen: bool) -> None:
+        """Plot simulation environment.
+
+        Args:
+            dark_mode (bool): whether to use dark mode for the plot.
+            fullscreen (bool): whether to plot the figure in fullscreen mode.
+        """
         times = np.arange(0, self._current_track.timeout, self.DT)
         speeds = [item[2] for item in self._current_statistics.data]
         rotations = [
@@ -246,6 +260,7 @@ class SimulationAPI:
         ]
 
         # Figure and axes setup:
+        plt.style.use("dark_background" if dark_mode else "fast")
         fig = plt.figure()
         ax1 = fig.add_subplot(121, projection="3d")
         ax2 = fig.add_subplot(422)
@@ -280,6 +295,7 @@ class SimulationAPI:
         ax2.set_ylim(self._current_track.drone.SPEED_RANGE)
 
         # 3D ax configuration:
+        self._current_track._track.plot(ax1)
         ax1.plot(
             [wp.x for wp in self._current_track.track.waypoints],
             [wp.y for wp in self._current_track.track.waypoints],
@@ -293,6 +309,9 @@ class SimulationAPI:
 
         # Figure configuration:
         plt.tight_layout()
+        plt.get_current_fig_manager().window.state(  # type: ignore
+            "zoomed" if fullscreen else "normal"
+        )
         plt.show()
 
     def summary(self) -> None:
