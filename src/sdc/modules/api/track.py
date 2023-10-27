@@ -29,9 +29,11 @@ class TrackAPI:
         is_track_finished (bool): whether the track is finished.
         is_drone_stopped (bool): whether the drone is stopped.
         REACHED_THRESHOLD (float): reached waypoint threshold in m.
+        MIN_TIMEOUT_SPEED (float): minimum timeout speed in m/s.
     """
 
-    REACHED_THRESHOLD = 4  # [m]
+    REACHED_THRESHOLD = 1  # [m]
+    MIN_TIMEOUT_SPEED = 5  # [m/s]
 
     def __init__(self, track: Track) -> None:
         """Initialize a TrackAPI instance.
@@ -129,6 +131,21 @@ class TrackAPI:
             bool: True if the drone is stopped, False otherwise.
         """
         return self._is_track_finished and self._drone.speed == 0
+
+    @property
+    def timeout(self) -> float:
+        """Get track timeout.
+
+        Track timeout is computed as double the distance between each waypoint
+        divided by the minimum expected drone speed.
+
+        Returns:
+            float: track timeout.
+        """
+        return sum(
+            distance3D(*self._track.waypoints[i - 1: i])
+            for i in range(1, len(self._track.waypoints))
+        ) * 2 / self.MIN_TIMEOUT_SPEED
 
     def _eval_reached_waypoint(self) -> None:
         """Evaluate whether the drone has reached the next waypoint.
