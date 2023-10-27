@@ -22,7 +22,7 @@ class Track:
         start (Vector3D): track start.
         end (Vector3D): track end.
         rings (List[Ring]): track rings.
-        checkpoints (List[Vector3D]): track checkpoints.
+        waypoints (List[Vector3D]): track waypoints.
     """
 
     def __init__(
@@ -125,25 +125,25 @@ class Track:
         self._rings = value
 
     @property
-    def checkpoints(self) -> List[Vector3D]:
-        """Get track checkpoints.
+    def waypoints(self) -> List[Vector3D]:
+        """Get track waypoints.
 
         Returns:
-            List[Vector3D]: track checkpoints.
+            List[Vector3D]: track waypoints.
         """
-        return [self.start, *self.rings, self.end]
+        return [self.start, *[ring.position for ring in self._rings], self.end]
 
     @staticmethod
-    def ax_auto_fit(ax, offset: int = 1, *checkpoints: Vector3D) -> None:
+    def ax_auto_fit(ax, offset: int = 1, *waypoints: Vector3D) -> None:
         """Set axis limits automatically.
 
         Args:
             ax (Axes3D): ax to set limits for.
             offset (int, optional): additional distance margin. Defaults to 1.
         """
-        x = [checkpoint.x for checkpoint in checkpoints]
-        y = [checkpoint.y for checkpoint in checkpoints]
-        z = [checkpoint.z for checkpoint in checkpoints]
+        x = [checkpoint.x for checkpoint in waypoints]
+        y = [checkpoint.y for checkpoint in waypoints]
+        z = [checkpoint.z for checkpoint in waypoints]
 
         centers = (
             (max(x) + min(x)) / 2,
