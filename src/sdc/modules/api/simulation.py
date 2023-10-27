@@ -49,7 +49,10 @@ class SimulationAPI:
             tracks (List[Track]): track list.
         """
         self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
-        self._statistics = [TrackStatistics(track, self.DT) for _ in tracks]
+        self._statistics = [
+            TrackStatistics(track, self.DT)
+            for track in tracks
+        ]
 
     @property
     def tracks(self) -> List[TrackAPI]:
@@ -92,6 +95,10 @@ class SimulationAPI:
         # Internal attributes reset:
         self._is_simulation_finished = False
         self._current_track = self._tracks.pop(0)
+        self._current_statistics = self._statistics.pop(0)
+        self._current_timer = 0.0
+        self._target_rotation = Rotator3D()
+        self._target_speed = 0.0
 
     @property
     def drone(self) -> DroneAPI:
@@ -158,7 +165,60 @@ class SimulationAPI:
         self._target_speed = speed
 
     def update(self) -> None:
-        pass
+        """Update drone state along the current track and plot environment."""
+        self._current_timer += self.DT
+
+        # Track timeout handling:
+        if self._current_timer >= self._current_track.timeout:
+            if self._tracks:
+                self._current_track = self._tracks.pop(0)
+                self._current_statistics = self._statistics.pop(0)
+            else:
+                self._is_simulation_finished = True
+
+            return
+
+        # Track finish handling:
+        if (
+            self._current_track.is_track_finished
+            and self._current_track.is_drone_stopped
+        ):
+            if self._tracks:
+                self._current_track = self._tracks.pop(0)
+                self._current_statistics = self._statistics.pop(0)
+            else:
+                self._is_simulation_finished = True
+
+            return
+
+        # Rotation update:
+        self._current_track.drone.rotation = Rotator3D(
+            *[
+                min(cu_r + self.DR * self.DT, tg_r)
+                if cu_r < tg_r else
+                max(cu_r - self.DR * self.DT, tg_r)
+                for cu_r, tg_r in zip(
+                    self._current_track.drone.rotation,
+                    self._target_rotation
+                )
+            ]
+        )
+
+        # Speed update:
+        speed = self._current_track.drone.speed
+        self._current_track.drone.speed = (
+            min(speed + self.DV * self.DT, self._target_speed)
+            if self._target_speed >= speed else
+            max(speed - self.DV * self.DT, self._target_speed)
+        )
+
+        # TODO: Add displacement update here.
+
+        self._current_statistics.add_data(
+            position=self._current_track.drone.position,
+            rotation=self._current_track.drone.rotation,
+            speed=self._current_track.drone.speed
+        )
 
     def summary(self) -> None:
         pass
