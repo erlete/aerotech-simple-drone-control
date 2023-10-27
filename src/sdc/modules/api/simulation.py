@@ -10,6 +10,8 @@ Author:
 
 from typing import List, Optional, Union
 
+import numpy as np
+
 from ..core.vector import Rotator3D, Vector3D
 from ..environment.track import Track
 from .drone import DroneAPI
@@ -30,10 +32,14 @@ class SimulationAPI:
         next_waypoint (Optional[Vector3D]): next waypoint data.
         remaining_waypoints (int): remaining waypoints in the track.
         is_simulation_finished (bool): whether the simulation is finished.
-        DT (float): simulation time step in s.
+        DT (float): simulation time step in seconds.
+        DV (float): simulation speed step in m/s.
+        DR (float): simulation rotation step in rad/s.
     """
 
     DT = 0.1  # [s]
+    DV = 10  # [m/s]
+    DR = np.pi/4  # [rad/s]
 
     def __init__(self, tracks: List[Track]) -> None:
         """Initialize a SimulationAPI instance.
@@ -126,7 +132,28 @@ class SimulationAPI:
         rotation: Rotator3D,
         speed: Union[int, float]
     ) -> None:
-        pass
+        """Set drone target state.
+
+        Args:
+            rotation (Rotator3D): target drone rotation.
+            speed (Union[int, float]): target drone speed.
+        """
+        if not isinstance(rotation, Rotator3D):
+            raise TypeError(
+                "expected type Rotator3D for"
+                + f" {self.__class__.__name__}.set_drone_target_state"
+                + f" but got {type(rotation).__name__} instead"
+            )
+
+        if not isinstance(speed, (int, float)):
+            raise TypeError(
+                "expected type Union[int, float] for"
+                + f" {self.__class__.__name__}.set_drone_target_state"
+                + f" but got {type(speed).__name__} instead"
+            )
+
+        self._target_rotation = rotation
+        self._target_speed = speed
 
     def update(self) -> None:
         pass
