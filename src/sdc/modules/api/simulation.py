@@ -173,6 +173,7 @@ class SimulationAPI:
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
                 self._current_statistics = self._statistics.pop(0)
+                self._current_timer = 0.0
             else:
                 self._is_simulation_finished = True
 
@@ -186,6 +187,7 @@ class SimulationAPI:
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
                 self._current_statistics = self._statistics.pop(0)
+                self._current_timer = 0.0
             else:
                 self._is_simulation_finished = True
 
