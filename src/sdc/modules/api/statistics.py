@@ -30,7 +30,7 @@ class TrackStatistics:
 
         # Automatically generated attributes:
         self._is_completed = False
-        self._distance_to_end = 0
+        self._distance_to_end = 0.0
         self._data = []  # type: ignore
 
     @property
