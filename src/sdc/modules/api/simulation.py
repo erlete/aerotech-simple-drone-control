@@ -165,13 +165,19 @@ class SimulationAPI:
         self._target_rotation = rotation
         self._target_speed = speed
 
-    def update(self) -> None:
-        """Update drone state along the current track and plot environment."""
+    def update(self, plot: bool = True) -> None:
+        """Update drone state along the current track and plot environment.
+
+        Args:
+            plot (bool): whether to plot statistics after each track. Defaults
+                to True.
+        """
         self._current_timer += self.DT
 
         # Track timeout handling:
         if self._current_timer >= self._current_track.timeout:
-            self.plot()
+            if plot:
+                self.plot()
 
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
@@ -187,7 +193,8 @@ class SimulationAPI:
             self._current_track.is_track_finished
             and self._current_track.is_drone_stopped
         ):
-            self.plot()
+            if plot:
+                self.plot()
 
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
