@@ -9,7 +9,7 @@ from typing import List, Tuple, Union
 
 from ..api.track import TrackAPI
 from ..core.vector import Rotator3D, Vector3D
-from ..geometry.track import Track
+from ..environment.track import Track
 
 
 class TrackStatistics:
