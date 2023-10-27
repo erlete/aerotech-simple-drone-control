@@ -10,31 +10,80 @@ Author:
 
 from typing import List, Optional
 
-from ..core.vector import Rotator3D, Vector3D
+from ..core.vector import Vector3D
 from ..environment.track import Track
-from ..geometry.drone import Drone
 from .drone import DroneAPI
 from .track import TrackAPI
 
 
 class SimulationAPI:
+    """Simulation API class.
+
+    This class represents a simulation that implements all kinematic variants
+    of the simulation elements, such as the drone and the track. It provides
+    with several methods that allow the user to get information about the
+    simulation's state and control it.
+
+    Attributes:
+        tracks (List[TrackAPI]): track list.
+        drone (DroneAPI): drone element.
+        next_waypoint (Optional[Vector3D]): next waypoint data.
+        remaining_waypoints (int): remaining waypoints in the track.
+        is_simulation_finished (bool): whether the simulation is finished.
+        DT (float): simulation time step in s.
+    """
+
+    DT = 0.1  # [s]
 
     def __init__(self, tracks: List[Track]) -> None:
-        # Internal attribute initialization:
-        self._is_finished = False
-        self._next_waypoint = None
-        self._drone = DroneAPI(Drone(Vector3D(0, 0, 0), Rotator3D(0, 0, 0)))
+        """Initialize a SimulationAPI instance.
 
-        self.tracks = [TrackAPI(self._drone, track) for track in tracks]
+        Args:
+            tracks (List[Track]): track list.
+        """
+        self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
 
     @property
-    def is_finished(self) -> bool:
-        """Returns whether the simulation is finished.
+    def tracks(self) -> List[TrackAPI]:
+        """Get track list.
 
         Returns:
-            bool: True if the simulation is finished, False otherwise.
+            List[TrackAPI]: track list.
         """
-        return self._is_finished
+        return self._tracks
+
+    @tracks.setter
+    def tracks(self, value: List[TrackAPI]) -> None:
+        """Set track list.
+
+        Args:
+            value (List[TrackAPI]): track list.
+        """
+        if not isinstance(value, list):
+            raise TypeError(
+                "expected type List[Track] for"
+                + f" {self.__class__.__name__}.tracks but got"
+                + f" {type(value).__name__} instead"
+            )
+
+        if not value:
+            raise ValueError(
+                f"{self.__class__.__name__}.tracks cannot be empty"
+            )
+
+        for i, track in enumerate(value):
+            if not isinstance(track, Track):
+                raise TypeError(
+                    "expected type Track for"
+                    + f" {self.__class__.__name__}.tracks but got"
+                    + f" {type(track).__name__} from item at index {i} instead"
+                )
+
+        self._tracks = value
+
+        # Internal attributes reset:
+        self._is_simulation_finished = False
+        self._current_track = self._tracks.pop(0)
 
     @property
     def drone(self) -> DroneAPI:
@@ -43,7 +92,7 @@ class SimulationAPI:
         Returns:
             DroneAPI: drone element.
         """
-        return self._drone
+        return self._current_track.drone
 
     @property
     def next_waypoint(self) -> Optional[Vector3D]:
@@ -52,4 +101,22 @@ class SimulationAPI:
         Returns:
             Optional[Vector3D]: next waypoint data.
         """
-        return self._next_waypoint
+        return self._current_track.next_waypoint
+
+    @property
+    def remaining_waypoints(self) -> int:
+        """Returns the remaining waypoints in the track.
+
+        Returns:
+            int: remaining waypoints in the track.
+        """
+        return self._current_track.remaining_waypoints
+
+    @property
+    def is_simulation_finished(self) -> bool:
+        """Returns whether the simulation is finished.
+
+        Returns:
+            bool: True if the simulation is finished, False otherwise.
+        """
+        return self._is_simulation_finished
