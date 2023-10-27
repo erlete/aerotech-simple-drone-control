@@ -21,7 +21,7 @@ TRACKS_DATABASE = "src/sdc/databases/tracks.json"
 sim = SimulationAPI(TrackSequenceReader(TRACKS_DATABASE).track_sequence)
 
 # Simulation mainloop:
-while not sim.is_finished:
+while not sim.is_simulation_finished:
 
     """Drone element.
 
@@ -47,9 +47,12 @@ while not sim.is_finished:
     next_waypoint, remaining = sim.next_waypoint, sim.remaining_waypoints
 
     # TODO: implement path planning and control logic here.
-    #   Set target drone rotation using sim.set_drone_rotation(Rotator3D(...))
-    #   Set target drone speed using sim.set_drone_speed(float(...))
-    #   Note: you can remove this comment once you have implemented the logic.
+
+    # Update drone state (modify this with your own logic output values):
+    sim.set_drone_target_state(
+        rotation=Rotator3D(0, 0, 0),
+        speed=0
+    )
 
     # Update simulation state:
     sim.update()

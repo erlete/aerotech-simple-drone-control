@@ -8,9 +8,9 @@ Author:
 """
 
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from ..core.vector import Vector3D
+from ..core.vector import Rotator3D, Vector3D
 from ..environment.track import Track
 from .drone import DroneAPI
 from .track import TrackAPI
@@ -120,3 +120,16 @@ class SimulationAPI:
             bool: True if the simulation is finished, False otherwise.
         """
         return self._is_simulation_finished
+
+    def set_drone_target_state(
+        self,
+        rotation: Rotator3D,
+        speed: Union[int, float]
+    ) -> None:
+        pass
+
+    def update(self) -> None:
+        pass
+
+    def summary(self) -> None:
+        pass
