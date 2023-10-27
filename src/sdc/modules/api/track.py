@@ -112,7 +112,8 @@ class TrackAPI:
         Returns:
             int: remaining waypoints in the track (including current one).
         """
-        return len(self._waypoints) + 1  # Compensation for current waypoint.
+        # Adds 1 if the track is not finished to compensate for start waypoint:
+        return len(self._waypoints) + (not self._is_track_finished)
 
     @property
     def is_track_finished(self) -> bool:
