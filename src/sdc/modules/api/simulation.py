@@ -13,6 +13,7 @@ from typing import List, Optional, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..core.gradient import ColorGradient
 from ..core.vector import Rotator3D, Vector3D
 from ..environment.track import Track
 from .drone import DroneAPI
