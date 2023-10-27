@@ -505,6 +505,22 @@ class Rotator3D(Vector3D):
         self.y = np.deg2rad(y)
         self.z = np.deg2rad(z)
 
+    def __repr__(self) -> str:
+        """Get the raw representation of the rotator.
+
+        Returns:
+            str: raw representation of the rotator.
+        """
+        return f"Rotator3D({self.x}, {self.y}, {self.z})"
+
+    def __str__(self) -> str:
+        """Get the string representation of the rotator.
+
+        Returns:
+            str: string representation of the rotator.
+        """
+        return f"({self.x}, {self.y}, {self.z})"
+
 
 def distance3D(a: Vector3D, b: Vector3D) -> float:
     """Get the distance between two vectors.
