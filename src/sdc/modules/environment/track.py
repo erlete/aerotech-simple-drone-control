@@ -182,10 +182,7 @@ class Track:
 
         # Color gradient for rings:
         gradient = ColorGradient("#ff0000", "#0000ff", len(self.rings))
-        steps = [
-            f"#{step[0]:02x}{step[1]:02x}{step[2]:02x}"
-            for step in gradient.steps
-        ]
+        steps = [ColorGradient.rgb_to_hex(step) for step in gradient.steps]
 
         # Ring plotting:
         for color, ring in zip(steps, self.rings):

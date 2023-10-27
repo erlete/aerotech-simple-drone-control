@@ -296,11 +296,14 @@ class SimulationAPI:
 
         # 3D ax configuration:
         self._current_track._track.plot(ax1)
-        ax1.plot(
+        waypoints = [
             [wp.x for wp in self._current_track.track.waypoints],
             [wp.y for wp in self._current_track.track.waypoints],
             [wp.z for wp in self._current_track.track.waypoints]
-        )
+        ]
+        gradient = ColorGradient("#dc143c", "#15b01a", len(waypoints[0]))
+        for x, y, z, c in zip(*waypoints, gradient.steps):
+            ax1.plot(x, y, z, "D", color=ColorGradient.rgb_to_hex(c), ms=4)
 
         ax1.set_title("3D Flight visualization")
         ax1.set_xlabel("X [m]")
