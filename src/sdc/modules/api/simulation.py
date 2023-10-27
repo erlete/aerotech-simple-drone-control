@@ -40,7 +40,7 @@ class SimulationAPI:
 
     DT = 0.1  # [s]
     DV = 10  # [m/s]
-    DR = np.pi/4  # [rad/s]
+    DR = 4 * np.pi  # [rad/s]
 
     def __init__(self, tracks: List[Track]) -> None:
         """Initialize a SimulationAPI instance.
@@ -194,10 +194,11 @@ class SimulationAPI:
         # Rotation update:
         self._current_track.drone.rotation = Rotator3D(
             *[
-                min(cu_r + self.DR * self.DT, tg_r)
-                if cu_r < tg_r else
-                max(cu_r - self.DR * self.DT, tg_r)
-                for cu_r, tg_r in zip(
+                np.rad2deg(
+                    min(cu_r + self.DR * self.DT, tg_r)
+                    if cu_r < tg_r else
+                    max(cu_r - self.DR * self.DT, tg_r)
+                ) for cu_r, tg_r in zip(
                     self._current_track.drone.rotation,
                     self._target_rotation
                 )
