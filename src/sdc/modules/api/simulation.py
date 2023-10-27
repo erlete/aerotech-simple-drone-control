@@ -15,6 +15,7 @@ import numpy as np
 from ..core.vector import Rotator3D, Vector3D
 from ..environment.track import Track
 from .drone import DroneAPI
+from .statistics import TrackStatistics
 from .track import TrackAPI
 
 
@@ -48,6 +49,7 @@ class SimulationAPI:
             tracks (List[Track]): track list.
         """
         self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
+        self._statistics = [TrackStatistics(track, self.DT) for _ in tracks]
 
     @property
     def tracks(self) -> List[TrackAPI]:
