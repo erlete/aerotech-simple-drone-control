@@ -10,6 +10,7 @@ Author:
 
 from typing import List, Optional, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from ..core.vector import Rotator3D, Vector3D
@@ -170,6 +171,8 @@ class SimulationAPI:
 
         # Track timeout handling:
         if self._current_timer >= self._current_track.timeout:
+            self.plot()
+
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
                 self._current_statistics = self._statistics.pop(0)
@@ -184,6 +187,8 @@ class SimulationAPI:
             self._current_track.is_track_finished
             and self._current_track.is_drone_stopped
         ):
+            self.plot()
+
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
                 self._current_statistics = self._statistics.pop(0)
@@ -222,6 +227,66 @@ class SimulationAPI:
             rotation=self._current_track.drone.rotation,
             speed=self._current_track.drone.speed
         )
+
+    def plot(self) -> None:
+        """Plot simulation environment."""
+        times = np.arange(0, self._current_track.timeout, self.DT)
+        speeds = [item[2] for item in self._current_statistics.data]
+        rotations = [
+            [item[1].x for item in self._current_statistics.data],
+            [item[1].y for item in self._current_statistics.data],
+            [item[1].z for item in self._current_statistics.data]
+        ]
+
+        # Figure and axes setup:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(121, projection="3d")
+        ax2 = fig.add_subplot(422)
+        ax3 = fig.add_subplot(424)
+        ax4 = fig.add_subplot(426)
+        ax5 = fig.add_subplot(428)
+
+        # 2D axes configuration:
+        axes = (ax2, ax3, ax4, ax5)
+        labels = (
+            "Speed [m/s]",
+            "X rotation [rad]",
+            "Y rotation [rad]",
+            "Z rotation [rad]"
+        )
+        titles = (
+            "Speed vs Time",
+            "X rotation vs Time",
+            "Y rotation vs Time",
+            "Z rotation vs Time"
+        )
+        data = (speeds, *rotations)
+
+        for ax, data_, title, label in zip(axes, data, titles, labels):
+            ax.plot(times[:len(data_)], data_)
+            ax.set_xlim(0, self._current_track.timeout)
+            ax.set_title(titles[axes.index(ax)])
+            ax.set_xlabel("Time [s]")
+            ax.set_ylabel(label)
+            ax.grid(True)
+
+        ax2.set_ylim(self._current_track.drone.SPEED_RANGE)
+
+        # 3D ax configuration:
+        ax1.plot(
+            [wp.x for wp in self._current_track.track.waypoints],
+            [wp.y for wp in self._current_track.track.waypoints],
+            [wp.z for wp in self._current_track.track.waypoints]
+        )
+
+        ax1.set_title("3D Flight visualization")
+        ax1.set_xlabel("X [m]")
+        ax1.set_ylabel("Y [m]")
+        ax1.set_zlabel("Z [m]")  # type: ignore
+
+        # Figure configuration:
+        plt.tight_layout()
+        plt.show()
 
     def summary(self) -> None:
         pass
