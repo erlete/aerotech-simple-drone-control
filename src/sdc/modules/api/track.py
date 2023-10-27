@@ -4,6 +4,7 @@ Author:
     Paulo Sanchez (@erlete)
 """
 
+
 from typing import List, Optional
 
 from ..core.vector import Rotator3D, Vector3D, distance3D
