@@ -48,11 +48,11 @@ class SimulationAPI:
         Args:
             tracks (List[Track]): track list.
         """
-        self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
         self._statistics = [
             TrackStatistics(track, self.DT)
             for track in tracks
         ]
+        self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
 
     @property
     def tracks(self) -> List[TrackAPI]:
@@ -83,7 +83,7 @@ class SimulationAPI:
             )
 
         for i, track in enumerate(value):
-            if not isinstance(track, Track):
+            if not isinstance(track, TrackAPI):
                 raise TypeError(
                     "expected type Track for"
                     + f" {self.__class__.__name__}.tracks but got"
