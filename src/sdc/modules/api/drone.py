@@ -1,4 +1,4 @@
-"""Control API module.
+"""Drone API module.
 
 Author:
     Paulo Sanchez (@erlete)
