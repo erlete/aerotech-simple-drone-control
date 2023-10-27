@@ -22,6 +22,7 @@ class Track:
         start (Vector3D): track start.
         end (Vector3D): track end.
         rings (List[Ring]): track rings.
+        checkpoints (List[Vector3D]): track checkpoints.
     """
 
     def __init__(
@@ -122,6 +123,15 @@ class Track:
                 )
 
         self._rings = value
+
+    @property
+    def checkpoints(self) -> List[Vector3D]:
+        """Get track checkpoints.
+
+        Returns:
+            List[Vector3D]: track checkpoints.
+        """
+        return [self.start, *self.rings, self.end]
 
     @staticmethod
     def ax_auto_fit(ax, offset: int = 1, *checkpoints: Vector3D) -> None:
@@ -253,3 +263,11 @@ class Track:
             int: track length.
         """
         return len(self._rings) + 2  # Start and end points compensation.
+
+    def __hash__(self) -> int:
+        """Get track hash.
+
+        Returns:
+            int: track hash.
+        """
+        return hash(tuple([self._start, *self._rings, self._end]))

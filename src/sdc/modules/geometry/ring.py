@@ -28,8 +28,8 @@ class Ring:
 
     def __init__(
         self,
-        position: Vector3D = Vector3D(0, 0, 0),
-        rotation: Rotator3D = Rotator3D(0, 0, 0),
+        position: Vector3D = Vector3D(),
+        rotation: Rotator3D = Rotator3D(),
         scale: Vector3D = Vector3D(1, 1, 1),
         tube_radius: Union[int, float] = 1,
         hole_radius: Union[int, float] = 5,

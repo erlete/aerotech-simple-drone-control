@@ -30,9 +30,9 @@ class Vector3D:
 
     def __init__(
         self,
-        x: Union[int, float],
-        y: Union[int, float],
-        z: Union[int, float]
+        x: Union[int, float] = 0,
+        y: Union[int, float] = 0,
+        z: Union[int, float] = 0
     ) -> None:
         """Initialize a Vector3D instance.
 
@@ -467,6 +467,14 @@ class Vector3D:
         """
         return f"({self.x}, {self.y}, {self.z})"
 
+    def __hash__(self) -> int:
+        """Get the hash of the vector.
+
+        Returns:
+            int: hash of the vector.
+        """
+        return hash((self.x, self.y, self.z))
+
 
 class Rotator3D(Vector3D):
     """3D rotation representation class.
@@ -482,9 +490,9 @@ class Rotator3D(Vector3D):
 
     def __init__(
         self,
-        x: Union[int, float],
-        y: Union[int, float],
-        z: Union[int, float]
+        x: Union[int, float] = 0,
+        y: Union[int, float] = 0,
+        z: Union[int, float] = 0
     ) -> None:
         """Initialize a Rotator3D instance.
 
@@ -496,3 +504,22 @@ class Rotator3D(Vector3D):
         self.x = np.deg2rad(x)
         self.y = np.deg2rad(y)
         self.z = np.deg2rad(z)
+
+
+def distance3D(a: Vector3D, b: Vector3D) -> float:
+    """Get the distance between two vectors.
+
+    Args:
+        a (Vector3D): first vector.
+        b (Vector3D): second vector.
+
+    Returns:
+        float: distance between the two vectors.
+    """
+    if not (isinstance(a, Vector3D) and isinstance(b, Vector3D)):
+        raise TypeError(
+            "expected type Vector3D for operands but got"
+            + f" {type(a).__name__} and {type(b).__name__} instead"
+        )
+
+    return ((b.x - a.x)**2 + (b.y - a.y)**2 + (b.z - a.z)**2) ** .5

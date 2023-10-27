@@ -1,0 +1,122 @@
+"""Simulation API module.
+
+This module combines all API resources to compose the Simulation API,
+responsible for the execution, update and summary of the simulation.
+
+Author:
+    Paulo Sanchez (@erlete)
+"""
+
+
+from typing import List, Optional
+
+from ..core.vector import Vector3D
+from ..environment.track import Track
+from .drone import DroneAPI
+from .track import TrackAPI
+
+
+class SimulationAPI:
+    """Simulation API class.
+
+    This class represents a simulation that implements all kinematic variants
+    of the simulation elements, such as the drone and the track. It provides
+    with several methods that allow the user to get information about the
+    simulation's state and control it.
+
+    Attributes:
+        tracks (List[TrackAPI]): track list.
+        drone (DroneAPI): drone element.
+        next_waypoint (Optional[Vector3D]): next waypoint data.
+        remaining_waypoints (int): remaining waypoints in the track.
+        is_simulation_finished (bool): whether the simulation is finished.
+        DT (float): simulation time step in s.
+    """
+
+    DT = 0.1  # [s]
+
+    def __init__(self, tracks: List[Track]) -> None:
+        """Initialize a SimulationAPI instance.
+
+        Args:
+            tracks (List[Track]): track list.
+        """
+        self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
+
+    @property
+    def tracks(self) -> List[TrackAPI]:
+        """Get track list.
+
+        Returns:
+            List[TrackAPI]: track list.
+        """
+        return self._tracks
+
+    @tracks.setter
+    def tracks(self, value: List[TrackAPI]) -> None:
+        """Set track list.
+
+        Args:
+            value (List[TrackAPI]): track list.
+        """
+        if not isinstance(value, list):
+            raise TypeError(
+                "expected type List[Track] for"
+                + f" {self.__class__.__name__}.tracks but got"
+                + f" {type(value).__name__} instead"
+            )
+
+        if not value:
+            raise ValueError(
+                f"{self.__class__.__name__}.tracks cannot be empty"
+            )
+
+        for i, track in enumerate(value):
+            if not isinstance(track, Track):
+                raise TypeError(
+                    "expected type Track for"
+                    + f" {self.__class__.__name__}.tracks but got"
+                    + f" {type(track).__name__} from item at index {i} instead"
+                )
+
+        self._tracks = value
+
+        # Internal attributes reset:
+        self._is_simulation_finished = False
+        self._current_track = self._tracks.pop(0)
+
+    @property
+    def drone(self) -> DroneAPI:
+        """Returns the drone element.
+
+        Returns:
+            DroneAPI: drone element.
+        """
+        return self._current_track.drone
+
+    @property
+    def next_waypoint(self) -> Optional[Vector3D]:
+        """Returns the next waypoint data.
+
+        Returns:
+            Optional[Vector3D]: next waypoint data.
+        """
+        return self._current_track.next_waypoint
+
+    @property
+    def remaining_waypoints(self) -> int:
+        """Returns the remaining waypoints in the track.
+
+        Returns:
+            int: remaining waypoints in the track.
+        """
+        return self._current_track.remaining_waypoints
+
+    @property
+    def is_simulation_finished(self) -> bool:
+        """Returns whether the simulation is finished.
+
+        Returns:
+            bool: True if the simulation is finished, False otherwise.
+        """
+        return self._is_simulation_finished
