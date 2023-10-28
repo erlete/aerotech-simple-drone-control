@@ -15,13 +15,13 @@ class TrackStatistics:
 
     def __init__(
         self,
-        track: Union[TrackAPI],
+        track: TrackAPI,
         timestep: Union[int, float]
     ) -> None:
         """Initialize a TrackStatistics instance.
 
         Args:
-            track (Union[Track, TrackAPI]): statistics track.
+            track (TrackAPI): statistics track.
             timestep (Union[int, float]): statistics timestep.
         """
         self.track = track
