@@ -1,6 +1,3 @@
-# Repository src installation:
-sdc @ file:///D:/Development/Repositories/simple-drone-control
-
 # Package requirements:
 matplotlib==3.8.0
 numpy==1.26.1
