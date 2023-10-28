@@ -50,9 +50,9 @@ class SimulationAPI:
         Args:
             tracks (List[Track]): track list.
         """
-        self._completed_statistics = []
+        self._completed_statistics: List[TrackStatistics] = []
         self._statistics = [
-            TrackStatistics(track, self.DT)
+            TrackStatistics(TrackAPI(track), self.DT)
             for track in tracks
         ]
         self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
