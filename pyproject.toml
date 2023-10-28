@@ -12,7 +12,7 @@ version = "0.0.1"
 description = "Simple drone control simulation that serves as API for more complex programs."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.9.0"
+requires-python = ">=3.10.0"
 authors = [
     {name = "Paulo Sanchez", email = "dev.szblzpaulo@gmail.com"}
 ]
