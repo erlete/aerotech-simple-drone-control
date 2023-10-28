@@ -9,14 +9,13 @@ from typing import List, Tuple, Union
 
 from ..api.track import TrackAPI
 from ..core.vector import Rotator3D, Vector3D
-from ..environment.track import Track
 
 
 class TrackStatistics:
 
     def __init__(
         self,
-        track: Union[Track, TrackAPI],
+        track: Union[TrackAPI],
         timestep: Union[int, float]
     ) -> None:
         """Initialize a TrackStatistics instance.
@@ -25,6 +24,7 @@ class TrackStatistics:
             track (Union[Track, TrackAPI]): statistics track.
             timestep (Union[int, float]): statistics timestep.
         """
+        self.track = track
         self.timestep = timestep
         self._waypoints = track.waypoints
 
@@ -32,6 +32,31 @@ class TrackStatistics:
         self._is_completed = False
         self._distance_to_end = 0.0
         self._data = []  # type: ignore
+
+    @property
+    def track(self) -> TrackAPI:
+        """Get track.
+
+        Returns:
+            TrackAPI: track.
+        """
+        return self._track
+
+    @track.setter
+    def track(self, value: TrackAPI) -> None:
+        """Set track.
+
+        Args:
+            value (TrackAPI): track.
+        """
+        if not isinstance(value, TrackAPI):
+            raise TypeError(
+                "expected type TrackAPI for"
+                + f" {self.__class__.__name__}.track but got"
+                + f" {type(value).__name__} instead"
+            )
+
+        self._track = value
 
     @property
     def timestep(self) -> Union[int, float]:
@@ -126,6 +151,33 @@ class TrackStatistics:
                 rotation and speed of the drone at each timestep.
         """
         return self._data
+
+    @property
+    def positions(self) -> List[Vector3D]:
+        """Get drone positions at each timestep.
+
+        Returns:
+            List[Vector3D]: drone positions at each timestep.
+        """
+        return [data[0] for data in self._data]
+
+    @property
+    def rotations(self) -> List[Rotator3D]:
+        """Get drone rotations at each timestep.
+
+        Returns:
+            List[Rotator3D]: drone rotations at each timestep.
+        """
+        return [data[1] for data in self._data]
+
+    @property
+    def speeds(self) -> List[Union[int, float]]:
+        """Get drone speeds at each timestep.
+
+        Returns:
+            List[Union[int, float]]: drone speeds at each timestep.
+        """
+        return [data[2] for data in self._data]
 
     def add_data(
         self,
