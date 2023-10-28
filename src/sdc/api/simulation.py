@@ -346,7 +346,6 @@ class SimulationAPI:
             save (bool): whether to save the summary to a file. Defaults to
                 False.
         """
-        print([s.speeds for s in self._completed_statistics])
         header = f"{' Simulation summary ':=^80}"
         track = [
             f"""{' Track ' + str(i) + ' ':-^80}
