@@ -8,6 +8,9 @@ Author:
 """
 
 
+import json
+import os
+from time import perf_counter as pc
 from typing import List, Optional, Union
 
 import matplotlib.pyplot as plt
@@ -43,6 +46,9 @@ class SimulationAPI:
     DT = 0.1  # [s]
     DV = 10  # [m/s]
     DR = 4 * np.pi  # [rad/s]
+
+    SUMMARY_FILE_PREFIX = "summary_"
+    SUMMARY_DIR = "statistics"
 
     def __init__(self, tracks: List[Track]) -> None:
         """Initialize a SimulationAPI instance.
@@ -333,5 +339,94 @@ class SimulationAPI:
         )
         plt.show()
 
-    def summary(self) -> None:
-        pass
+    def summary(self, save: bool = False) -> None:
+        """Print a summary of the simulation.
+
+        Args:
+            save (bool): whether to save the summary to a file. Defaults to
+                False.
+        """
+        print([s.speeds for s in self._completed_statistics])
+        header = f"{' Simulation summary ':=^80}"
+        track = [
+            f"""{' Track ' + str(i) + ' ':-^80}
+    > Completed: {s.is_completed}
+    > Distance to end: {s.distance_to_end:.5f} m
+    > Max speed: {max(s.speeds):.5f} m/s
+    > Min speed: {min(s.speeds):.5f} m/s
+    > Average speed: {np.mean(s.speeds):.5f} m/s
+""" for i, s in enumerate(self._completed_statistics, start=1)
+        ]
+
+        overall = f"""
+{' Overall ':-^80}
+    > Total tracks: {(t := len(self._completed_statistics))}
+    > Completed tracks: {
+        (c := len([s for s in self._completed_statistics if s.is_completed]))
+    } ({c / t * 100:.2f}%)
+    > Max speed: {
+        max([max(s.speeds) for s in self._completed_statistics])
+    :.5f} m/s
+    > Min speed: {
+        min([min(s.speeds) for s in self._completed_statistics])
+    :.5f} m/s
+    > Average speed: {
+        np.mean([np.mean(s.speeds) for s in self._completed_statistics])
+    :.5f} m/s
+"""
+
+        footer = "=" * 80
+
+        print(f"{header}\n{''.join(track).strip()}{overall}{footer}")
+
+        if save:
+            self._save_summary()
+
+    def _save_summary(self) -> None:
+        """Save simulation summary to a file."""
+        if not os.path.exists(self.SUMMARY_DIR):
+            os.makedirs(self.SUMMARY_DIR)
+
+        with open(
+            f"{self.SUMMARY_DIR}/{self.SUMMARY_FILE_PREFIX}{int(pc())}.json",
+            mode="w",
+            encoding="utf-8"
+        ) as fp:
+            json.dump(
+                {
+                    "tracks": [
+                        {
+                            "is_completed": s.is_completed,
+                            "distance_to_end": s.distance_to_end,
+                            "positions": [
+                                [position.x, position.y, position.z]
+                                for position in s.positions
+                            ],
+                            "rotations": [
+                                [rotation.x, rotation.y, rotation.z]
+                                for rotation in s.rotations
+                            ],
+                            "speeds": s.speeds
+                        } for s in self._completed_statistics
+                    ],
+                    "overall": {
+                        "total_tracks": len(self._completed_statistics),
+                        "completed_tracks": len(
+                            [s for s in self._completed_statistics
+                             if s.is_completed]
+                        ),
+                        "max_speed": max(
+                            [max(s.speeds) for s in self._completed_statistics]
+                        ),
+                        "min_speed": min(
+                            [min(s.speeds) for s in self._completed_statistics]
+                        ),
+                        "average_speed": np.mean([
+                            np.mean(s.speeds)
+                            for s in self._completed_statistics
+                        ])
+                    }
+                },
+                fp,
+                indent=4
+            )
