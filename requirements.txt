@@ -1,3 +1,12 @@
+# Repository src installation:
+sdc @ file:///D:/Development/Repositories/simple-drone-control
+
+# Package requirements:
 matplotlib
 numpy
+# Testing and linting:
 pytest
+pycodestyle
+pydocstyle
+mypy
+flake8
