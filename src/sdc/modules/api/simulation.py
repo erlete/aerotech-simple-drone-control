@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..core.gradient import ColorGradient
-from ..core.vector import Rotator3D, Vector3D
+from ..core.vector import Rotator3D, Vector3D, distance3D
 from ..environment.track import Track
 from .drone import DroneAPI
 from .statistics import TrackStatistics
@@ -50,6 +50,7 @@ class SimulationAPI:
         Args:
             tracks (List[Track]): track list.
         """
+        self._completed_statistics = []
         self._statistics = [
             TrackStatistics(track, self.DT)
             for track in tracks
@@ -191,10 +192,12 @@ class SimulationAPI:
 
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
+                self._completed_statistics.append(self._current_statistics)
                 self._current_statistics = self._statistics.pop(0)
                 self._current_timer = 0.0
             else:
                 self._is_simulation_finished = True
+                self._completed_statistics.append(self._current_statistics)
 
             return
 
@@ -208,10 +211,22 @@ class SimulationAPI:
 
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
+                self._current_statistics.is_completed = True
+                self._current_statistics.distance_to_end = distance3D(
+                    self._current_track.drone.position,
+                    self._current_track.track.end
+                )
+                self._completed_statistics.append(self._current_statistics)
                 self._current_statistics = self._statistics.pop(0)
                 self._current_timer = 0.0
             else:
                 self._is_simulation_finished = True
+                self._current_statistics.is_completed = True
+                self._current_statistics.distance_to_end = distance3D(
+                    self._current_track.drone.position,
+                    self._current_track.track.end
+                )
+                self._completed_statistics.append(self._current_statistics)
 
             return
 
