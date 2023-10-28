@@ -28,6 +28,7 @@ class TrackAPI:
         remaining_waypoints (int): remaining waypoints in the track.
         is_track_finished (bool): whether the track is finished.
         is_drone_stopped (bool): whether the drone is stopped.
+        timeout (float): track timeout.
         REACHED_THRESHOLD (float): reached waypoint threshold in m.
         MIN_TIMEOUT_SPEED (float): minimum timeout speed in m/s.
     """
