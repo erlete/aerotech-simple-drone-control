@@ -6,7 +6,6 @@ consider certain physical or dynamic aspects of the real world, since it is
 meant to be used as a learning tool.
 
 Modules:
-    addons: additional modules that provide extra functionality.
     api: API modules for simulation, tracks and drones.
     core: core modules such as vector and color utilities.
     environment: environment management and display module.
