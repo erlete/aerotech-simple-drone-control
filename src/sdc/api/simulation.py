@@ -412,6 +412,5 @@ class SimulationAPI:
                         ])
                     }
                 },
-                fp,
-                indent=4
+                fp
             )
