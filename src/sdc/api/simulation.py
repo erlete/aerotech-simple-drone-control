@@ -191,48 +191,34 @@ class SimulationAPI:
         """
         self._current_timer += self.DT
 
-        # Track timeout handling:
-        if self._current_timer >= self._current_track.timeout:
+        # Simulation endpoint conditions' definition for later use:
+        c1 = self._current_timer >= self._current_track.timeout
+        c2 = self._current_track.is_track_finished
+        c3 = self._current_track.is_drone_stopped
+
+        # On completed track finish condition:
+        if c2 and c3:
+            self._current_statistics.is_completed = True
+            self._current_statistics.distance_to_end = distance3D(
+                self._current_track.drone.position,
+                self._current_track.track.end
+            )
+
+        # On each of the simulation finish conditions:
+        if c1 or (c2 and c3):
+
             if plot:
                 self.plot(dark_mode, fullscreen)
 
+            # Save current statistics:
+            self._completed_statistics.append(self._current_statistics)
+
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
-                self._completed_statistics.append(self._current_statistics)
                 self._current_statistics = self._statistics.pop(0)
                 self._current_timer = 0.0
             else:
                 self._is_simulation_finished = True
-                self._completed_statistics.append(self._current_statistics)
-
-            return
-
-        # Track finish handling:
-        if (
-            self._current_track.is_track_finished
-            and self._current_track.is_drone_stopped
-        ):
-            if plot:
-                self.plot(dark_mode, fullscreen)
-
-            if self._tracks:
-                self._current_track = self._tracks.pop(0)
-                self._current_statistics.is_completed = True
-                self._current_statistics.distance_to_end = distance3D(
-                    self._current_track.drone.position,
-                    self._current_track.track.end
-                )
-                self._completed_statistics.append(self._current_statistics)
-                self._current_statistics = self._statistics.pop(0)
-                self._current_timer = 0.0
-            else:
-                self._is_simulation_finished = True
-                self._current_statistics.is_completed = True
-                self._current_statistics.distance_to_end = distance3D(
-                    self._current_track.drone.position,
-                    self._current_track.track.end
-                )
-                self._completed_statistics.append(self._current_statistics)
 
             return
 
