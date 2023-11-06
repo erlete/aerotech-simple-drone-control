@@ -6,26 +6,25 @@ Author:
 
 
 from itertools import cycle
-from typing import List, Union
 
 import matplotlib.pyplot as plt
 
 
 def ax_lim_auto(
     ax,
-    x: List[Union[int, float]],
-    y: List[Union[int, float]],
-    z: List[Union[int, float]],
-    offset: Union[int, float]
+    x: list[int | float],
+    y: list[int | float],
+    z: list[int | float],
+    offset: int | float
 ):
     """Set axis limits automatically.
 
     Args:
         ax (matplotlib.Axes.Axes): ax to set limits for.
-        x (List[Union[int, float]]): x coordinates.
-        y (List[Union[int, float]]): y coordinates.
-        z (List[Union[int, float]]): z coordinates.
-        offset (Union[int, float]): additional distance to add to limits.
+        x (list[int | float]): x coordinates.
+        y (list[int | float]): y coordinates.
+        z (list[int | float]): z coordinates.
+        offset (int | float): additional distance to add to limits.
     """
     centers = (
         (max(x) + min(x)) / 2,
@@ -56,9 +55,9 @@ def ax_lim_auto(
 COLORS = cycle(["r", "g", "b", "m", "y", "k"])  # Cycling colors.
 
 # Coordinate input:
-x: List[Union[int, float]] = [0, 1, 2]
-y: List[Union[int, float]] = [0, 1, 2]
-z: List[Union[int, float]] = [0, 1, 2]
+x: list[int, float] = [0, 1, 2]
+y: list[int, float] = [0, 1, 2]
+z: list[int, float] = [0, 1, 2]
 
 # Formatted output:
 print(str({

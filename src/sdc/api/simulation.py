@@ -11,7 +11,6 @@ Author:
 import json
 import os
 from time import perf_counter as pc
-from typing import List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,9 +32,9 @@ class SimulationAPI:
     simulation's state and control it.
 
     Attributes:
-        tracks (List[TrackAPI]): track list.
+        tracks (list[TrackAPI]): track list.
         drone (DroneAPI): drone element.
-        next_waypoint (Optional[Vector3D]): next waypoint data.
+        next_waypoint (Vector3D | None): next waypoint data.
         remaining_waypoints (int): remaining waypoints in the track.
         is_simulation_finished (bool): whether the simulation is finished.
         DT (float): simulation time step in seconds.
@@ -50,13 +49,13 @@ class SimulationAPI:
     SUMMARY_FILE_PREFIX = "summary_"
     SUMMARY_DIR = "statistics"
 
-    def __init__(self, tracks: List[Track]) -> None:
+    def __init__(self, tracks: list[Track]) -> None:
         """Initialize a SimulationAPI instance.
 
         Args:
-            tracks (List[Track]): track list.
+            tracks (list[Track]): track list.
         """
-        self._completed_statistics: List[TrackStatistics] = []
+        self._completed_statistics: list[TrackStatistics] = []
         self._statistics = [
             TrackStatistics(TrackAPI(track), self.DT)
             for track in tracks
@@ -64,24 +63,24 @@ class SimulationAPI:
         self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
 
     @property
-    def tracks(self) -> List[TrackAPI]:
+    def tracks(self) -> list[TrackAPI]:
         """Get track list.
 
         Returns:
-            List[TrackAPI]: track list.
+            list[TrackAPI]: track list.
         """
         return self._tracks
 
     @tracks.setter
-    def tracks(self, value: List[TrackAPI]) -> None:
+    def tracks(self, value: list[TrackAPI]) -> None:
         """Set track list.
 
         Args:
-            value (List[TrackAPI]): track list.
+            value (list[TrackAPI]): track list.
         """
         if not isinstance(value, list):
             raise TypeError(
-                "expected type List[Track] for"
+                "expected type list[Track] for"
                 + f" {self.__class__.__name__}.tracks but got"
                 + f" {type(value).__name__} instead"
             )
@@ -119,11 +118,11 @@ class SimulationAPI:
         return self._current_track.drone
 
     @property
-    def next_waypoint(self) -> Optional[Vector3D]:
+    def next_waypoint(self) -> Vector3D | None:
         """Returns the next waypoint data.
 
         Returns:
-            Optional[Vector3D]: next waypoint data.
+            Vector3D | None: next waypoint data.
         """
         return self._current_track.next_waypoint
 
@@ -147,16 +146,16 @@ class SimulationAPI:
 
     def set_drone_target_state(
         self,
-        yaw: Union[int, float],
-        pitch: Union[int, float],
-        speed: Union[int, float]
+        yaw: int | float,
+        pitch: int | float,
+        speed: int | float
     ) -> None:
         """Set drone target state.
 
         Args:
-            yaw (Union[int, float]): target drone yaw in radians.
-            pitch (Union[int, float]): target drone pitch in radians.
-            speed (Union[int, float]): target drone speed in m/s.
+            yaw (int | float): target drone yaw in radians.
+            pitch (int | float): target drone pitch in radians.
+            speed (int | float): target drone speed in m/s.
         """
         if not isinstance(yaw, (int, float)):
             raise TypeError(
@@ -174,7 +173,7 @@ class SimulationAPI:
 
         if not isinstance(speed, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.set_drone_target_state speed"
                 + f" but got {type(speed).__name__} instead"
             )

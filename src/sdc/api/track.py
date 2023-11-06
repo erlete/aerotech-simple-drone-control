@@ -5,8 +5,6 @@ Author:
 """
 
 
-from typing import List, Optional
-
 from ..core.vector import Rotator3D, Vector3D, distance3D
 from ..environment.track import Track
 from .drone import DroneAPI
@@ -23,8 +21,8 @@ class TrackAPI:
     Attributes:
         track (Track): track.
         drone (DroneAPI): drone.
-        waypoints (List[Vector3D]): track waypoints.
-        next_waypoint (Optional[Vector3D]): next waypoint data.
+        waypoints (list[Vector3D]): track waypoints.
+        next_waypoint (Vector3D | None): next waypoint data.
         remaining_waypoints (int): remaining waypoints in the track.
         is_track_finished (bool): whether the track is finished.
         is_drone_stopped (bool): whether the drone is stopped.
@@ -72,7 +70,7 @@ class TrackAPI:
 
         # Internal attributes reset:
         self._waypoints = [*[ring.position for ring in value.rings], value.end]
-        self._next_waypoint: Optional[Vector3D] = self._waypoints.pop(0)
+        self._next_waypoint: Vector3D | None = self._waypoints.pop(0)
         self._is_track_finished = self._is_drone_stopped = False
 
         self._track = value
@@ -87,20 +85,20 @@ class TrackAPI:
         return self._drone
 
     @property
-    def waypoints(self) -> List[Vector3D]:
+    def waypoints(self) -> list[Vector3D]:
         """Get track waypoints.
 
         Returns:
-            List[Vector3D]: track waypoints.
+            list[Vector3D]: track waypoints.
         """
         return self._waypoints
 
     @property
-    def next_waypoint(self) -> Optional[Vector3D]:
+    def next_waypoint(self) -> Vector3D | None:
         """Update and return next waypoint data.
 
         Returns:
-            Optional[Vector3D]: next waypoint data or None if the track is
+            Vector3D | None: next waypoint data or None if the track is
                 finished.
         """
         self._eval_reached_waypoint()

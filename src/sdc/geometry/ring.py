@@ -5,8 +5,6 @@ Author:
 """
 
 
-from typing import Union
-
 import numpy as np
 
 from ..core.vector import Rotator3D, Vector3D
@@ -22,7 +20,7 @@ class Ring:
         tube_radius (float): ring tube radius.
         hole_radius (float): ring hole radius.
         complexity (int): ring geometry complexity.
-        surface (Tuple[np.ndarray, np.ndarray, np.ndarray]): ring geometry
+        surface (tuple[np.ndarray, np.ndarray, np.ndarray]): ring geometry
             surface.
     """
 
@@ -31,8 +29,8 @@ class Ring:
         position: Vector3D = Vector3D(),
         rotation: Rotator3D = Rotator3D(),
         scale: Vector3D = Vector3D(1, 1, 1),
-        tube_radius: Union[int, float] = 1,
-        hole_radius: Union[int, float] = 5,
+        tube_radius: int | float = 1,
+        hole_radius: int | float = 5,
         complexity: int = 100
     ) -> None:
         """Initialize a Ring instance.
@@ -44,9 +42,9 @@ class Ring:
                 Rotator3D(0, 0, 0).
             scale (Vector3D, optional): ring scale. Defaults to
                 Vector3D(1, 1, 1).
-            tube_radius (Union[int, float], optional): ring tube radius.
+            tube_radius (int | float, optional): ring tube radius.
                 Defaults to 1.
-            hole_radius (Union[int, float], optional): ring hole radius.
+            hole_radius (int | float, optional): ring hole radius.
                 Defaults to 5.
             complexity (int, optional): ring geometry complexity. Defaults to
                 100.
@@ -145,15 +143,15 @@ class Ring:
         return self._tube_radius
 
     @tube_radius.setter
-    def tube_radius(self, value: Union[int, float]) -> None:
+    def tube_radius(self, value: int | float) -> None:
         """Set ring tube radius.
 
         Args:
-            value (Union[int, float]): ring tube radius.
+            value (int | float): ring tube radius.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.tube_radius but got"
                 + f" {type(value).__name__} instead"
             )
@@ -170,15 +168,15 @@ class Ring:
         return self._hole_radius
 
     @hole_radius.setter
-    def hole_radius(self, value: Union[int, float]) -> None:
+    def hole_radius(self, value: int | float) -> None:
         """Set ring hole radius.
 
         Args:
-            value (Union[int, float]): ring hole radius.
+            value (int | float): ring hole radius.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.hole_radius but got"
                 + f" {type(value).__name__} instead"
             )
@@ -195,15 +193,15 @@ class Ring:
         return self._complexity
 
     @complexity.setter
-    def complexity(self, value: Union[int, float]) -> None:
+    def complexity(self, value: int | float) -> None:
         """Set ring geometry complexity.
 
         Args:
-            value (Union[int, float]): ring geometry complexity.
+            value (int | float): ring geometry complexity.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.complexity but got"
                 + f" {type(value).__name__} instead"
             )
