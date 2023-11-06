@@ -147,30 +147,43 @@ class SimulationAPI:
 
     def set_drone_target_state(
         self,
-        rotation: Rotator3D,
+        yaw: Union[int, float],
+        pitch: Union[int, float],
         speed: Union[int, float]
     ) -> None:
         """Set drone target state.
 
         Args:
-            rotation (Rotator3D): target drone rotation.
-            speed (Union[int, float]): target drone speed.
+            yaw (Union[int, float]): target drone yaw in radians.
+            pitch (Union[int, float]): target drone pitch in radians.
+            speed (Union[int, float]): target drone speed in m/s.
         """
-        if not isinstance(rotation, Rotator3D):
+        if not isinstance(yaw, (int, float)):
             raise TypeError(
-                "expected type Rotator3D for"
-                + f" {self.__class__.__name__}.set_drone_target_state"
-                + f" but got {type(rotation).__name__} instead"
+                "expected type (int, float) for"
+                + f" {self.__class__.__name__}.set_drone_target_state yaw"
+                + f" but got {type(yaw).__name__} instead"
+            )
+
+        if not isinstance(pitch, (int, float)):
+            raise TypeError(
+                "expected type (int, float) for"
+                + f" {self.__class__.__name__}.set_drone_target_state pitch"
+                + f" but got {type(pitch).__name__} instead"
             )
 
         if not isinstance(speed, (int, float)):
             raise TypeError(
                 "expected type Union[int, float] for"
-                + f" {self.__class__.__name__}.set_drone_target_state"
+                + f" {self.__class__.__name__}.set_drone_target_state speed"
                 + f" but got {type(speed).__name__} instead"
             )
 
-        self._target_rotation = rotation
+        self._target_rotation = Rotator3D(
+            np.rad2deg(yaw),
+            np.rad2deg(pitch),
+            0
+        )
         self._target_speed = speed
 
     def update(
