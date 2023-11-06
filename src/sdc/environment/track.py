@@ -5,8 +5,6 @@ Author:
 """
 
 
-from typing import List
-
 from ..core.gradient import ColorGradient
 from ..core.vector import Vector3D
 from ..geometry.ring import Ring
@@ -21,22 +19,22 @@ class Track:
     Attributes:
         start (Vector3D): track start.
         end (Vector3D): track end.
-        rings (List[Ring]): track rings.
-        waypoints (List[Vector3D]): track waypoints.
+        rings (list[Ring]): track rings.
+        waypoints (list[Vector3D]): track waypoints.
     """
 
     def __init__(
         self,
         start: Vector3D,
         end: Vector3D,
-        rings: List[Ring]
+        rings: list[Ring]
     ) -> None:
         """Initialize a Track instance.
 
         Args:
             start (Vector3D): track start.
             end (Vector3D): track end.
-            rings (List[Ring]): track rings.
+            rings (list[Ring]): track rings.
         """
         self.start = start
         self.end = end
@@ -93,24 +91,24 @@ class Track:
         self._end = value
 
     @property
-    def rings(self) -> List[Ring]:
+    def rings(self) -> list[Ring]:
         """Get track rings.
 
         Returns:
-            List[Ring]: track rings.
+            list[Ring]: track rings.
         """
         return self._rings
 
     @rings.setter
-    def rings(self, value: List[Ring]) -> None:
+    def rings(self, value: list[Ring]) -> None:
         """Set track rings.
 
         Args:
-            value (List[Ring]): track rings.
+            value (list[Ring]): track rings.
         """
         if not isinstance(value, list):
             raise TypeError(
-                "expected type List[Ring] for"
+                "expected type list[Ring] for"
                 + f" {self.__class__.__name__}.rings but got"
                 + f" {type(value).__name__} instead"
             )
@@ -125,11 +123,11 @@ class Track:
         self._rings = value
 
     @property
-    def waypoints(self) -> List[Vector3D]:
+    def waypoints(self) -> list[Vector3D]:
         """Get track waypoints.
 
         Returns:
-            List[Vector3D]: track waypoints.
+            list[Vector3D]: track waypoints.
         """
         return [self.start, *[ring.position for ring in self._rings], self.end]
 

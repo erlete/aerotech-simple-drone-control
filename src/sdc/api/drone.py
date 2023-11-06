@@ -5,8 +5,6 @@ Author:
 """
 
 
-from typing import Union
-
 from ..core.vector import Rotator3D, Vector3D
 from ..geometry.drone import Drone
 
@@ -20,7 +18,7 @@ class DroneAPI(Drone):
     Attributes:
         drone (Drone): drone.
         speed (float): drone speed in m/s.
-        SPEED_RANGE (Tuple[int, int]): allowed drone speed range in m/s.
+        SPEED_RANGE (tuple[int, int]): allowed drone speed range in m/s.
     """
 
     SPEED_RANGE = (0, 20)  # [m/s]
@@ -29,14 +27,14 @@ class DroneAPI(Drone):
         self,
         position: Vector3D,
         rotation: Rotator3D,
-        speed: Union[int, float] = 0
+        speed: int | float = 0
     ) -> None:
         """Initialize a DroneAPI instance.
 
         Args:
             position (Vector3D): drone position.
             rotation (Rotator3D): drone rotation.
-            speed (Union[int, float]): drone speed in m/s.
+            speed (int | float): drone speed in m/s.
         """
         super().__init__(position, rotation)
         self.speed = speed
@@ -51,11 +49,11 @@ class DroneAPI(Drone):
         return self._speed
 
     @speed.setter
-    def speed(self, value: Union[int, float]) -> None:
+    def speed(self, value: int | float) -> None:
         """Set drone speed.
 
         Args:
-            value (Union[int, float]): drone speed.
+            value (int | float): drone speed.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(

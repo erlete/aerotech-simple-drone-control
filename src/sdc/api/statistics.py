@@ -5,8 +5,6 @@ Author:
 """
 
 
-from typing import List, Tuple, Union
-
 from ..api.track import TrackAPI
 from ..core.vector import Rotator3D, Vector3D
 
@@ -16,13 +14,13 @@ class TrackStatistics:
     def __init__(
         self,
         track: TrackAPI,
-        timestep: Union[int, float]
+        timestep: int | float
     ) -> None:
         """Initialize a TrackStatistics instance.
 
         Args:
             track (TrackAPI): statistics track.
-            timestep (Union[int, float]): statistics timestep.
+            timestep (int | float): statistics timestep.
         """
         self.track = track
         self.timestep = timestep
@@ -31,7 +29,7 @@ class TrackStatistics:
         # Automatically generated attributes:
         self._is_completed = False
         self._distance_to_end = 0.0
-        self._data = []  # type: ignore
+        self._data = [(Vector3D(), Rotator3D(), 0.0)]  # Initial data.
 
     @property
     def track(self) -> TrackAPI:
@@ -59,24 +57,24 @@ class TrackStatistics:
         self._track = value
 
     @property
-    def timestep(self) -> Union[int, float]:
+    def timestep(self) -> int | float:
         """Get statistics timestep.
 
         Returns:
-            Union[int, float]: statistics timestep.
+            int | float: statistics timestep.
         """
         return self._timestep
 
     @timestep.setter
-    def timestep(self, value: Union[int, float]) -> None:
+    def timestep(self, value: int | float) -> None:
         """Set statistics timestep.
 
         Args:
-            value (Union[int, float]): statistics timestep.
+            value (int | float): statistics timestep.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.timestep but got"
                 + f" {type(value).__name__} instead"
             )
@@ -84,11 +82,11 @@ class TrackStatistics:
         self._timestep = value
 
     @property
-    def waypoints(self) -> List[Vector3D]:
+    def waypoints(self) -> list[Vector3D]:
         """Get track waypoints.
 
         Returns:
-            List[Vector3D]: track waypoints.
+            list[Vector3D]: track waypoints.
         """
         return self._waypoints
 
@@ -127,15 +125,15 @@ class TrackStatistics:
         return self._distance_to_end
 
     @distance_to_end.setter
-    def distance_to_end(self, value: Union[int, float]) -> None:
+    def distance_to_end(self, value: int | float) -> None:
         """Set drone distance to track end.
 
         Args:
-            value (Union[int, float]): drone distance to track end.
+            value (int | float): drone distance to track end.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.distance_to_end but got"
                 + f" {type(value).__name__} instead"
             )
@@ -143,39 +141,39 @@ class TrackStatistics:
         self._distance_to_end = float(value)
 
     @property
-    def data(self) -> List[Tuple[Vector3D, Rotator3D, Union[int, float]]]:
+    def data(self) -> list[tuple[Vector3D, Rotator3D, int | float]]:
         """Get drone position, rotation and speed data at each timestep.
 
         Returns:
-            List[Tuple[Vector3D, Rotator3D, Union[int, float]]]: position,
+            list[tuple[Vector3D, Rotator3D, int | float]]: position,
                 rotation and speed of the drone at each timestep.
         """
         return self._data
 
     @property
-    def positions(self) -> List[Vector3D]:
+    def positions(self) -> list[Vector3D]:
         """Get drone positions at each timestep.
 
         Returns:
-            List[Vector3D]: drone positions at each timestep.
+            list[Vector3D]: drone positions at each timestep.
         """
         return [data[0] for data in self._data]
 
     @property
-    def rotations(self) -> List[Rotator3D]:
+    def rotations(self) -> list[Rotator3D]:
         """Get drone rotations at each timestep.
 
         Returns:
-            List[Rotator3D]: drone rotations at each timestep.
+            list[Rotator3D]: drone rotations at each timestep.
         """
         return [data[1] for data in self._data]
 
     @property
-    def speeds(self) -> List[Union[int, float]]:
+    def speeds(self) -> list[int | float]:
         """Get drone speeds at each timestep.
 
         Returns:
-            List[Union[int, float]]: drone speeds at each timestep.
+            list[int | float]: drone speeds at each timestep.
         """
         return [data[2] for data in self._data]
 
@@ -183,14 +181,14 @@ class TrackStatistics:
         self,
         position: Vector3D,
         rotation: Rotator3D,
-        speed: Union[int, float]
+        speed: int | float
     ) -> None:
         """Add drone position, rotation and speed data.
 
         Args:
             position (Vector3D): drone position.
             rotation (Rotator3D): drone rotation.
-            speed (Union[int, float]): drone speed.
+            speed (int | float): drone speed.
         """
         if not isinstance(position, Vector3D):
             raise TypeError(
@@ -208,7 +206,7 @@ class TrackStatistics:
 
         if not isinstance(speed, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.add_data but got"
                 + f" {type(speed).__name__} instead"
             )

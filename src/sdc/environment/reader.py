@@ -6,7 +6,6 @@ Author:
 
 
 import json
-from typing import List
 
 from ..core.vector import Rotator3D, Vector3D
 from ..environment.track import Track
@@ -21,7 +20,7 @@ class TrackSequenceReader:
 
     Attributes:
         path (str): track sequence file path.
-        track_sequence (List[Track]): track sequence.
+        track_sequence (list[Track]): track sequence.
     """
 
     def __init__(self, path: str) -> None:
@@ -59,19 +58,19 @@ class TrackSequenceReader:
         self._path = value
 
     @property
-    def track_sequence(self) -> List[Track]:
+    def track_sequence(self) -> list[Track]:
         """Get track sequence.
 
         Returns:
-            List[Track]: track sequence.
+            list[Track]: track sequence.
         """
         return self._track_sequence
 
-    def read(self) -> List[Track]:
+    def read(self) -> list[Track]:
         """Read track sequence file.
 
         Returns:
-            List[Track]: track sequence.
+            list[Track]: track sequence.
         """
         with open(self.path, mode="r", encoding="utf-8") as fp:
             data = json.load(fp)

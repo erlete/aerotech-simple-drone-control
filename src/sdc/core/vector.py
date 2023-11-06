@@ -11,7 +11,6 @@ Author:
 from __future__ import annotations
 
 import math
-from typing import Any, Iterator, Union
 
 import numpy as np
 
@@ -30,16 +29,16 @@ class Vector3D:
 
     def __init__(
         self,
-        x: Union[int, float] = 0,
-        y: Union[int, float] = 0,
-        z: Union[int, float] = 0
+        x: int | float = 0,
+        y: int | float = 0,
+        z: int | float = 0
     ) -> None:
         """Initialize a Vector3D instance.
 
         Args:
-            x (Union[int, float]): X component of the vector.
-            y (Union[int, float]): Y component of the vector.
-            z (Union[int, float]): Z component of the vector.
+            x (int | float): X component of the vector.
+            y (int | float): Y component of the vector.
+            z (int | float): Z component of the vector.
         """
         self.x = x
         self.y = y
@@ -55,15 +54,15 @@ class Vector3D:
         return self._x
 
     @x.setter
-    def x(self, value: Union[int, float]) -> None:
+    def x(self, value: int | float) -> None:
         """Set X component of the vector.
 
         Args:
-            value (Union[int, float]): X component of the vector.
+            value (int | float): X component of the vector.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.x but got"
                 + f" {type(value).__name__} instead"
             )
@@ -80,15 +79,15 @@ class Vector3D:
         return self._y
 
     @y.setter
-    def y(self, value: Union[int, float]) -> None:
+    def y(self, value: int | float) -> None:
         """Set Y component of the vector.
 
         Args:
-            value (Union[int, float]): Y component of the vector.
+            value (int | float): Y component of the vector.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.y but got"
                 + f" {type(value).__name__} instead"
             )
@@ -105,15 +104,15 @@ class Vector3D:
         return self._z
 
     @z.setter
-    def z(self, value: Union[int, float]) -> None:
+    def z(self, value: int | float) -> None:
         """Set Z component of the vector.
 
         Args:
-            value (Union[int, float]): Z component of the vector.
+            value (int | float): Z component of the vector.
         """
         if not isinstance(value, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
+                "expected type int | float for"
                 + f" {self.__class__.__name__}.z but got"
                 + f" {type(value).__name__} instead"
             )
@@ -158,11 +157,11 @@ class Vector3D:
             self.z - other.z
         )
 
-    def __mul__(self, other: Union[int, float]) -> Vector3D:
+    def __mul__(self, other: int | float) -> Vector3D:
         """Multiply a vector by a scalar.
 
         Args:
-            other (Union[int, float]): scalar to multiply by.
+            other (int | float): scalar to multiply by.
 
         Returns:
             Vector3D: resulting vector.
@@ -176,11 +175,11 @@ class Vector3D:
             self.z * other
         )
 
-    def __rmul__(self, other: Union[int, float]) -> Vector3D:
+    def __rmul__(self, other: int | float) -> Vector3D:
         """Multiply a vector by a scalar.
 
         Args:
-            other (Union[int, float]): scalar to multiply by.
+            other (int | float): scalar to multiply by.
 
         Returns:
             Vector3D: resulting vector.
@@ -194,11 +193,11 @@ class Vector3D:
             self.z * other
         )
 
-    def __truediv__(self, other: Union[int, float]) -> Vector3D:
+    def __truediv__(self, other: int | float) -> Vector3D:
         """Divide a vector by a scalar (float division).
 
         Args:
-            other (Union[int, float]): scalar to divide by.
+            other (int | float): scalar to divide by.
 
         Returns:
             Vector3D: resulting vector.
@@ -212,11 +211,11 @@ class Vector3D:
             self.z / other
         )
 
-    def __floordiv__(self, other: Union[int, float]) -> Vector3D:
+    def __floordiv__(self, other: int | float) -> Vector3D:
         """Divide a vector by a scalar (integer division).
 
         Args:
-            other (Union[int, float]): scalar to divide by.
+            other (int | float): scalar to divide by.
 
         Returns:
             Vector3D: resulting vector.
@@ -230,11 +229,11 @@ class Vector3D:
             self.z // other
         )
 
-    def __mod__(self, other: Union[int, float]) -> Vector3D:
+    def __mod__(self, other: int | float) -> Vector3D:
         """Get the remainder of a vector division by a scalar.
 
         Args:
-            other (Union[int, float]): scalar to divide by.
+            other (int | float): scalar to divide by.
 
         Returns:
             Vector3D: resulting vector.
@@ -248,11 +247,11 @@ class Vector3D:
             self.z % other
         )
 
-    def __pow__(self, other: Union[int, float]) -> Vector3D:
+    def __pow__(self, other: int | float) -> Vector3D:
         """Get the power of a vector.
 
         Args:
-            other (Union[int, float]): scalar to raise to.
+            other (int | float): scalar to raise to.
 
         Returns:
             Vector3D: resulting vector.
@@ -490,16 +489,16 @@ class Rotator3D(Vector3D):
 
     def __init__(
         self,
-        x: Union[int, float] = 0,
-        y: Union[int, float] = 0,
-        z: Union[int, float] = 0
+        x: int | float = 0,
+        y: int | float = 0,
+        z: int | float = 0
     ) -> None:
         """Initialize a Rotator3D instance.
 
         Args:
-            x (Union[int, float]): X rotation (degrees).
-            y (Union[int, float]): Y rotation (degrees).
-            z (Union[int, float]): Z rotation (degrees).
+            x (int | float): X rotation (degrees).
+            y (int | float): Y rotation (degrees).
+            z (int | float): Z rotation (degrees).
         """
         self.x = np.deg2rad(x)
         self.y = np.deg2rad(y)

@@ -1,6 +1,7 @@
 {
     "python.testing.pytestArgs": [
-        ".", "-vv"
+        "--cov=src/sdc", "--cov-report=xml:coverage.xml",
+        "-vv", "-s", "--color=yes", "src/sdc/tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true

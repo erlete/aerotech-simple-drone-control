@@ -11,7 +11,6 @@ Author:
 import json
 import os
 from time import perf_counter as pc
-from typing import List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,9 +32,9 @@ class SimulationAPI:
     simulation's state and control it.
 
     Attributes:
-        tracks (List[TrackAPI]): track list.
+        tracks (list[TrackAPI]): track list.
         drone (DroneAPI): drone element.
-        next_waypoint (Optional[Vector3D]): next waypoint data.
+        next_waypoint (Vector3D | None): next waypoint data.
         remaining_waypoints (int): remaining waypoints in the track.
         is_simulation_finished (bool): whether the simulation is finished.
         DT (float): simulation time step in seconds.
@@ -50,13 +49,13 @@ class SimulationAPI:
     SUMMARY_FILE_PREFIX = "summary_"
     SUMMARY_DIR = "statistics"
 
-    def __init__(self, tracks: List[Track]) -> None:
+    def __init__(self, tracks: list[Track]) -> None:
         """Initialize a SimulationAPI instance.
 
         Args:
-            tracks (List[Track]): track list.
+            tracks (list[Track]): track list.
         """
-        self._completed_statistics: List[TrackStatistics] = []
+        self._completed_statistics: list[TrackStatistics] = []
         self._statistics = [
             TrackStatistics(TrackAPI(track), self.DT)
             for track in tracks
@@ -64,24 +63,24 @@ class SimulationAPI:
         self.tracks = [TrackAPI(track) for track in tracks]  # Conversion.
 
     @property
-    def tracks(self) -> List[TrackAPI]:
+    def tracks(self) -> list[TrackAPI]:
         """Get track list.
 
         Returns:
-            List[TrackAPI]: track list.
+            list[TrackAPI]: track list.
         """
         return self._tracks
 
     @tracks.setter
-    def tracks(self, value: List[TrackAPI]) -> None:
+    def tracks(self, value: list[TrackAPI]) -> None:
         """Set track list.
 
         Args:
-            value (List[TrackAPI]): track list.
+            value (list[TrackAPI]): track list.
         """
         if not isinstance(value, list):
             raise TypeError(
-                "expected type List[Track] for"
+                "expected type list[Track] for"
                 + f" {self.__class__.__name__}.tracks but got"
                 + f" {type(value).__name__} instead"
             )
@@ -119,11 +118,11 @@ class SimulationAPI:
         return self._current_track.drone
 
     @property
-    def next_waypoint(self) -> Optional[Vector3D]:
+    def next_waypoint(self) -> Vector3D | None:
         """Returns the next waypoint data.
 
         Returns:
-            Optional[Vector3D]: next waypoint data.
+            Vector3D | None: next waypoint data.
         """
         return self._current_track.next_waypoint
 
@@ -147,30 +146,43 @@ class SimulationAPI:
 
     def set_drone_target_state(
         self,
-        rotation: Rotator3D,
-        speed: Union[int, float]
+        yaw: int | float,
+        pitch: int | float,
+        speed: int | float
     ) -> None:
         """Set drone target state.
 
         Args:
-            rotation (Rotator3D): target drone rotation.
-            speed (Union[int, float]): target drone speed.
+            yaw (int | float): target drone yaw in radians.
+            pitch (int | float): target drone pitch in radians.
+            speed (int | float): target drone speed in m/s.
         """
-        if not isinstance(rotation, Rotator3D):
+        if not isinstance(yaw, (int, float)):
             raise TypeError(
-                "expected type Rotator3D for"
-                + f" {self.__class__.__name__}.set_drone_target_state"
-                + f" but got {type(rotation).__name__} instead"
+                "expected type (int, float) for"
+                + f" {self.__class__.__name__}.set_drone_target_state yaw"
+                + f" but got {type(yaw).__name__} instead"
+            )
+
+        if not isinstance(pitch, (int, float)):
+            raise TypeError(
+                "expected type (int, float) for"
+                + f" {self.__class__.__name__}.set_drone_target_state pitch"
+                + f" but got {type(pitch).__name__} instead"
             )
 
         if not isinstance(speed, (int, float)):
             raise TypeError(
-                "expected type Union[int, float] for"
-                + f" {self.__class__.__name__}.set_drone_target_state"
+                "expected type int | float for"
+                + f" {self.__class__.__name__}.set_drone_target_state speed"
                 + f" but got {type(speed).__name__} instead"
             )
 
-        self._target_rotation = rotation
+        self._target_rotation = Rotator3D(
+            np.rad2deg(yaw),
+            np.rad2deg(pitch),
+            0
+        )
         self._target_speed = speed
 
     def update(
@@ -191,48 +203,36 @@ class SimulationAPI:
         """
         self._current_timer += self.DT
 
-        # Track timeout handling:
-        if self._current_timer >= self._current_track.timeout:
+        # Simulation endpoint conditions' definition for later use:
+        c1 = self._current_timer >= self._current_track.timeout
+        c2 = self._current_track.is_track_finished
+        c3 = self._current_track.is_drone_stopped
+
+        # On completed track finish condition:
+        if c2 and c3:
+            self._current_statistics.is_completed = True
+            self._current_statistics.distance_to_end = distance3D(
+                self._current_track.drone.position,
+                self._current_track.track.end
+            )
+
+        # On each of the simulation finish conditions:
+        if c1 or (c2 and c3):
+
+            # Plot current track statistics:
             if plot:
                 self.plot(dark_mode, fullscreen)
 
+            # Save current statistics:
+            self._completed_statistics.append(self._current_statistics)
+
+            # Get next track and reset time counter:
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
-                self._completed_statistics.append(self._current_statistics)
                 self._current_statistics = self._statistics.pop(0)
                 self._current_timer = 0.0
             else:
                 self._is_simulation_finished = True
-                self._completed_statistics.append(self._current_statistics)
-
-            return
-
-        # Track finish handling:
-        if (
-            self._current_track.is_track_finished
-            and self._current_track.is_drone_stopped
-        ):
-            if plot:
-                self.plot(dark_mode, fullscreen)
-
-            if self._tracks:
-                self._current_track = self._tracks.pop(0)
-                self._current_statistics.is_completed = True
-                self._current_statistics.distance_to_end = distance3D(
-                    self._current_track.drone.position,
-                    self._current_track.track.end
-                )
-                self._completed_statistics.append(self._current_statistics)
-                self._current_statistics = self._statistics.pop(0)
-                self._current_timer = 0.0
-            else:
-                self._is_simulation_finished = True
-                self._current_statistics.is_completed = True
-                self._current_statistics.distance_to_end = distance3D(
-                    self._current_track.drone.position,
-                    self._current_track.track.end
-                )
-                self._completed_statistics.append(self._current_statistics)
 
             return
 
@@ -240,10 +240,10 @@ class SimulationAPI:
         self._current_track.drone.rotation = Rotator3D(
             *[
                 np.rad2deg(
-                    min(cu_r + self.DR * self.DT, tg_r)
-                    if cu_r < tg_r else
-                    max(cu_r - self.DR * self.DT, tg_r)
-                ) for cu_r, tg_r in zip(
+                    min(curr_rot + self.DR * self.DT, tg_rot)
+                    if curr_rot < tg_rot else
+                    max(curr_rot - self.DR * self.DT, tg_rot)
+                ) for curr_rot, tg_rot in zip(
                     self._current_track.drone.rotation,
                     self._target_rotation
                 )
@@ -258,7 +258,15 @@ class SimulationAPI:
             max(speed - self.DV * self.DT, self._target_speed)
         )
 
-        # TODO: Add displacement update here.
+        # Position update:
+        rot = self._current_track.drone.rotation
+        self._current_track.drone.position += (
+            Vector3D(
+                speed * self.DT * np.cos(rot.x) * np.cos(rot.y),
+                speed * self.DT * np.sin(rot.x) * np.cos(rot.y),
+                speed * self.DT * np.sin(rot.y)
+            )
+        )
 
         self._current_statistics.add_data(
             position=self._current_track.drone.position,
@@ -273,13 +281,20 @@ class SimulationAPI:
             dark_mode (bool): whether to use dark mode for the plot.
             fullscreen (bool): whether to plot the figure in fullscreen mode.
         """
+        # Variable definition for later use:
         times = np.arange(0, self._current_track.timeout, self.DT)
-        speeds = [item[2] for item in self._current_statistics.data]
+        speeds = self._current_statistics.speeds
         rotations = [
-            [item[1].x for item in self._current_statistics.data],
-            [item[1].y for item in self._current_statistics.data],
-            [item[1].z for item in self._current_statistics.data]
+            [rot.x for rot in self._current_statistics.rotations],
+            [rot.y for rot in self._current_statistics.rotations],
+            [rot.z for rot in self._current_statistics.rotations]
         ]
+        positions = [
+            [pos.x for pos in self._current_statistics.positions],
+            [pos.y for pos in self._current_statistics.positions],
+            [pos.z for pos in self._current_statistics.positions]
+        ]
+        gradient = ColorGradient("#dc143c", "#15b01a", len(positions[0]))
 
         # Figure and axes setup:
         plt.style.use("dark_background" if dark_mode else "fast")
@@ -291,25 +306,27 @@ class SimulationAPI:
         ax5 = fig.add_subplot(428)
 
         # 2D axes configuration:
-        axes = (ax2, ax3, ax4, ax5)
-        labels = (
-            "Speed [m/s]",
-            "X rotation [rad]",
-            "Y rotation [rad]",
-            "Z rotation [rad]"
-        )
-        titles = (
-            "Speed vs Time",
-            "X rotation vs Time",
-            "Y rotation vs Time",
-            "Z rotation vs Time"
-        )
-        data = (speeds, *rotations)
+        config_2d = {
+            "axes": (ax2, ax3, ax4, ax5),
+            "data": (speeds, *rotations),
+            "labels": (
+                "Speed [m/s]",
+                "X rotation [rad]",
+                "Y rotation [rad]",
+                "Z rotation [rad]"
+            ),
+            "titles": (
+                "Speed vs Time",
+                "X rotation vs Time",
+                "Y rotation vs Time",
+                "Z rotation vs Time"
+            )
+        }
 
-        for ax, data_, title, label in zip(axes, data, titles, labels):
+        for ax, data_, title, label in zip(*config_2d.values()):
             ax.plot(times[:len(data_)], data_)
             ax.set_xlim(0, self._current_track.timeout)
-            ax.set_title(titles[axes.index(ax)])
+            ax.set_title(title)
             ax.set_xlabel("Time [s]")
             ax.set_ylabel(label)
             ax.grid(True)
@@ -318,23 +335,20 @@ class SimulationAPI:
 
         # 3D ax configuration:
         self._current_track._track.plot(ax1)
-        waypoints = [
-            [wp.x for wp in self._current_track.track.waypoints],
-            [wp.y for wp in self._current_track.track.waypoints],
-            [wp.z for wp in self._current_track.track.waypoints]
-        ]
-        gradient = ColorGradient("#dc143c", "#15b01a", len(waypoints[0]))
-        for x, y, z, c in zip(*waypoints, gradient.steps):
-            ax1.plot(x, y, z, "D", color=ColorGradient.rgb_to_hex(c), ms=4)
+
+        for x, y, z, c in zip(*positions, gradient.steps):
+            ax1.plot(x, y, z, "D", color=ColorGradient.rgb_to_hex(c), ms=2)
+
+        ax1.plot(*positions, "k--", alpha=.75, lw=.75)
 
         ax1.set_title("3D Flight visualization")
         ax1.set_xlabel("X [m]")
         ax1.set_ylabel("Y [m]")
-        ax1.set_zlabel("Z [m]")  # type: ignore
+        ax1.set_zlabel("Z [m]")
 
         # Figure configuration:
         plt.tight_layout()
-        plt.get_current_fig_manager().window.state(  # type: ignore
+        plt.get_current_fig_manager().window.state(
             "zoomed" if fullscreen else "normal"
         )
         plt.show()
@@ -346,7 +360,6 @@ class SimulationAPI:
             save (bool): whether to save the summary to a file. Defaults to
                 False.
         """
-        print([s.speeds for s in self._completed_statistics])
         header = f"{' Simulation summary ':=^80}"
         track = [
             f"""{' Track ' + str(i) + ' ':-^80}
@@ -427,6 +440,5 @@ class SimulationAPI:
                         ])
                     }
                 },
-                fp,
-                indent=4
+                fp
             )
