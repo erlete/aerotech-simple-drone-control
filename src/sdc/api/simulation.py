@@ -334,6 +334,8 @@ class SimulationAPI:
         for x, y, z, c in zip(*positions, gradient.steps):
             ax1.plot(x, y, z, "D", color=ColorGradient.rgb_to_hex(c), ms=4)
 
+        ax1.plot(*positions, "k--", alpha=0.5, lw=0.5)
+
         ax1.set_title("3D Flight visualization")
         ax1.set_xlabel("X [m]")
         ax1.set_ylabel("Y [m]")
