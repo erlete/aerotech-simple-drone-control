@@ -257,7 +257,15 @@ class SimulationAPI:
             max(speed - self.DV * self.DT, self._target_speed)
         )
 
-        # TODO: Add displacement update here.
+        # Position update:
+        rot = self._current_track.drone.rotation
+        self._current_track.drone.position += (
+            Vector3D(
+                speed * self.DT * np.cos(rot.x) * np.cos(rot.y),
+                speed * self.DT * np.sin(rot.x) * np.cos(rot.y),
+                speed * self.DT * np.sin(rot.y)
+            )
+        )
 
         self._current_statistics.add_data(
             position=self._current_track.drone.position,
