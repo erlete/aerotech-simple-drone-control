@@ -281,13 +281,20 @@ class SimulationAPI:
             dark_mode (bool): whether to use dark mode for the plot.
             fullscreen (bool): whether to plot the figure in fullscreen mode.
         """
+        # Variable definition for later use:
         times = np.arange(0, self._current_track.timeout, self.DT)
-        speeds = [item[2] for item in self._current_statistics.data]
+        speeds = self._current_statistics.speeds
         rotations = [
-            [item[1].x for item in self._current_statistics.data],
-            [item[1].y for item in self._current_statistics.data],
-            [item[1].z for item in self._current_statistics.data]
+            [rot.x for rot in self._current_statistics.rotations],
+            [rot.y for rot in self._current_statistics.rotations],
+            [rot.z for rot in self._current_statistics.rotations]
         ]
+        positions = [
+            [pos.x for pos in self._current_statistics.positions],
+            [pos.y for pos in self._current_statistics.positions],
+            [pos.z for pos in self._current_statistics.positions]
+        ]
+        gradient = ColorGradient("#dc143c", "#15b01a", len(positions[0]))
 
         # Figure and axes setup:
         plt.style.use("dark_background" if dark_mode else "fast")
@@ -299,25 +306,27 @@ class SimulationAPI:
         ax5 = fig.add_subplot(428)
 
         # 2D axes configuration:
-        axes = (ax2, ax3, ax4, ax5)
-        labels = (
-            "Speed [m/s]",
-            "X rotation [rad]",
-            "Y rotation [rad]",
-            "Z rotation [rad]"
-        )
-        titles = (
-            "Speed vs Time",
-            "X rotation vs Time",
-            "Y rotation vs Time",
-            "Z rotation vs Time"
-        )
-        data = (speeds, *rotations)
+        config_2d = {
+            "axes": (ax2, ax3, ax4, ax5),
+            "data": (speeds, *rotations),
+            "labels": (
+                "Speed [m/s]",
+                "X rotation [rad]",
+                "Y rotation [rad]",
+                "Z rotation [rad]"
+            ),
+            "titles": (
+                "Speed vs Time",
+                "X rotation vs Time",
+                "Y rotation vs Time",
+                "Z rotation vs Time"
+            )
+        }
 
-        for ax, data_, title, label in zip(axes, data, titles, labels):
+        for ax, data_, title, label in zip(*config_2d.values()):
             ax.plot(times[:len(data_)], data_)
             ax.set_xlim(0, self._current_track.timeout)
-            ax.set_title(titles[axes.index(ax)])
+            ax.set_title(title)
             ax.set_xlabel("Time [s]")
             ax.set_ylabel(label)
             ax.grid(True)
@@ -326,25 +335,20 @@ class SimulationAPI:
 
         # 3D ax configuration:
         self._current_track._track.plot(ax1)
-        positions = [
-            [pos.x for pos in self._current_statistics.positions],
-            [pos.y for pos in self._current_statistics.positions],
-            [pos.z for pos in self._current_statistics.positions]
-        ]
-        gradient = ColorGradient("#dc143c", "#15b01a", len(positions[0]))
-        for x, y, z, c in zip(*positions, gradient.steps):
-            ax1.plot(x, y, z, "D", color=ColorGradient.rgb_to_hex(c), ms=4)
 
-        ax1.plot(*positions, "k--", alpha=0.5, lw=0.5)
+        for x, y, z, c in zip(*positions, gradient.steps):
+            ax1.plot(x, y, z, "D", color=ColorGradient.rgb_to_hex(c), ms=2)
+
+        ax1.plot(*positions, "k--", alpha=.75, lw=.75)
 
         ax1.set_title("3D Flight visualization")
         ax1.set_xlabel("X [m]")
         ax1.set_ylabel("Y [m]")
-        ax1.set_zlabel("Z [m]")  # type: ignore
+        ax1.set_zlabel("Z [m]")
 
         # Figure configuration:
         plt.tight_layout()
-        plt.get_current_fig_manager().window.state(  # type: ignore
+        plt.get_current_fig_manager().window.state(
             "zoomed" if fullscreen else "normal"
         )
         plt.show()
