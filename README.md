@@ -18,8 +18,6 @@ python -m pip install --upgrade simple-drone-control
 
 Alternatively, it is also possible to clone this repository and use the package using `pip` and/or `build`.
 
-> *Note that the package has been developed for Python 3.10+ and, although it keeps some backward compatibility for versions up to 3.9, its dependencies might not be as compatible.*
-
 ## Usage
 
 ```python
