@@ -219,12 +219,14 @@ class SimulationAPI:
         # On each of the simulation finish conditions:
         if c1 or (c2 and c3):
 
+            # Plot current track statistics:
             if plot:
                 self.plot(dark_mode, fullscreen)
 
             # Save current statistics:
             self._completed_statistics.append(self._current_statistics)
 
+            # Get next track and reset time counter:
             if self._tracks:
                 self._current_track = self._tracks.pop(0)
                 self._current_statistics = self._statistics.pop(0)
@@ -238,10 +240,10 @@ class SimulationAPI:
         self._current_track.drone.rotation = Rotator3D(
             *[
                 np.rad2deg(
-                    min(cu_r + self.DR * self.DT, tg_r)
-                    if cu_r < tg_r else
-                    max(cu_r - self.DR * self.DT, tg_r)
-                ) for cu_r, tg_r in zip(
+                    min(curr_rot + self.DR * self.DT, tg_rot)
+                    if curr_rot < tg_rot else
+                    max(curr_rot - self.DR * self.DT, tg_rot)
+                ) for curr_rot, tg_rot in zip(
                     self._current_track.drone.rotation,
                     self._target_rotation
                 )
