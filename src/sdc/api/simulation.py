@@ -43,8 +43,8 @@ class SimulationAPI:
     """
 
     DT = 0.1  # [s]
-    DV = 10  # [m/s]
-    DR = 4 * np.pi  # [rad/s]
+    DV = 7.5  # [m/s]
+    DR = np.pi  # [rad/s]
 
     SUMMARY_FILE_PREFIX = "summary_"
     SUMMARY_DIR = "statistics"
@@ -353,14 +353,104 @@ class SimulationAPI:
         )
         plt.show()
 
-    def summary(self, save: bool = False) -> None:
-        """Print a summary of the simulation.
+    def _compute_score(
+        self,
+        statistics: TrackStatistics
+    ) -> tuple[int, dict[str, [dict[str, float]]]]:
+        """Compute track simulation score from statistics.
 
         Args:
-            save (bool): whether to save the summary to a file. Defaults to
-                False.
+            statistics (TrackStatistics): track statistics.
+
+        Returns:
+            tuple[int, dict[str, [dict[str, float]]]]: tuple containing the
+                track completion status and a dictionary containing the
+                different scores and their pondered values.
         """
+        # Variable definition for later use:
+        waypoints = statistics.track.track.waypoints  # Track waypoints.
+        positions = statistics.positions  # Drone positions during simulation.
+        max_sp = self.drone.SPEED_RANGE[1]  # Max drone speeed.
+
+        # Track Distance (TD):
+        min_td = sum([
+            distance3D(waypoints[i], waypoints[i+1])
+            for i in range(len(waypoints) - 1)
+        ])
+        max_td = 2 * min_td
+        td = sum([
+            distance3D(positions[i], positions[i+1])
+            for i in range(len(positions) - 1)
+        ])
+
+        # Distance To End (DTE):
+        max_tte = max_sp / self.DV  # Max time to end.
+        min_dte = 0
+        max_dte = max_sp * max_tte - .5 * self.DV * max_tte ** 2
+        dte = statistics.distance_to_end
+
+        # Track Time (TT):
+        min_tt = max_td / max_sp + min_dte
+        max_tt = (max_td / self.DV + max_tte) * 2
+        tt = len(statistics.positions) * self.DT
+
+        # Pondered score:
+        return (
+            int(statistics.is_completed),
+            {
+                "Distance to end (DTE)": {
+                    "weight": 0.4,
+                    "value": 1 - (
+                        min(dte - min_dte, max_dte - min_dte)
+                        / (max_dte - min_dte)
+                    )
+                },
+                "Track distance (TD)": {
+                    "weight": 0.25,
+                    "value": 1 - (
+                        min(td - min_td, max_td - min_td)
+                        / (max_td - min_td)
+                    )
+                },
+                "Track Time (TT)": {
+                    "weight": 0.35,
+                    "value": 1 - (
+                        min(tt - min_tt, max_tt - min_tt)
+                        / (max_tt - min_tt)
+                    )
+                }
+            } if statistics.is_completed else {}
+        )
+
+    def summary(self) -> None:
+        """Print a summary of the simulation."""
         header = f"{' Simulation summary ':=^80}"
+
+        rng = list(range(1, len(self._completed_statistics) + 1))
+        rng = [i / sum(rng) for i in rng]
+
+        # This is absolutely crazy. Please, future me, fix it ASAP.
+        scores = [
+            (
+                "DNF" if not score[0]
+                else f"(track weight: {rng[i] * 100:.2f}%)\n{' ' * 8}"
+                + f"\n{' ' * 8}".join([
+                    f"> {k} (weight: {v['weight'] * 100:.2f}%):"
+                    + f" {v['value'] * 100:.2f}%"
+                    for k, v in score[1].items()
+                ])
+            )
+            + f"\n{' ' * 4}> Total score (pondered): "
+            + f"""{sum([
+                v['weight'] * v['value']
+                for v in score[1].values()
+            ]) * 100:.2f}%"""
+            for i, score in enumerate([
+                self._compute_score(s)
+                for s in self._completed_statistics
+            ])
+        ]
+
         track = [
             f"""{' Track ' + str(i) + ' ':-^80}
     > Completed: {s.is_completed}
@@ -368,7 +458,19 @@ class SimulationAPI:
     > Max speed: {max(s.speeds):.5f} m/s
     > Min speed: {min(s.speeds):.5f} m/s
     > Average speed: {np.mean(s.speeds):.5f} m/s
+    > Scores: {scores[i-1]}
 """ for i, s in enumerate(self._completed_statistics, start=1)
+        ]
+
+        pondered_scores = [
+            sum([
+                v['weight'] * v['value']
+                for v in score[1].values()
+                if score[0]
+            ]) for score in [
+                self._compute_score(s)
+                for s in self._completed_statistics
+            ]
         ]
 
         overall = f"""
@@ -386,59 +488,12 @@ class SimulationAPI:
     > Average speed: {
         np.mean([np.mean(s.speeds) for s in self._completed_statistics])
     :.5f} m/s
+    > Score: {sum([
+        rng[i] * pondered_scores[i]
+        for i, _ in enumerate(rng)
+    ]) * 100:.2f}%
 """
 
         footer = "=" * 80
 
         print(f"{header}\n{''.join(track).strip()}{overall}{footer}")
-
-        if save:
-            self._save_summary()
-
-    def _save_summary(self) -> None:
-        """Save simulation summary to a file."""
-        if not os.path.exists(self.SUMMARY_DIR):
-            os.makedirs(self.SUMMARY_DIR)
-
-        with open(
-            f"{self.SUMMARY_DIR}/{self.SUMMARY_FILE_PREFIX}{int(pc())}.json",
-            mode="w",
-            encoding="utf-8"
-        ) as fp:
-            json.dump(
-                {
-                    "tracks": [
-                        {
-                            "is_completed": s.is_completed,
-                            "distance_to_end": s.distance_to_end,
-                            "positions": [
-                                [position.x, position.y, position.z]
-                                for position in s.positions
-                            ],
-                            "rotations": [
-                                [rotation.x, rotation.y, rotation.z]
-                                for rotation in s.rotations
-                            ],
-                            "speeds": s.speeds
-                        } for s in self._completed_statistics
-                    ],
-                    "overall": {
-                        "total_tracks": len(self._completed_statistics),
-                        "completed_tracks": len(
-                            [s for s in self._completed_statistics
-                             if s.is_completed]
-                        ),
-                        "max_speed": max(
-                            [max(s.speeds) for s in self._completed_statistics]
-                        ),
-                        "min_speed": min(
-                            [min(s.speeds) for s in self._completed_statistics]
-                        ),
-                        "average_speed": np.mean([
-                            np.mean(s.speeds)
-                            for s in self._completed_statistics
-                        ])
-                    }
-                },
-                fp
-            )
