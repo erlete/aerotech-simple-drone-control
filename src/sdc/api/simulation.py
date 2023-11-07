@@ -43,8 +43,8 @@ class SimulationAPI:
     """
 
     DT = 0.1  # [s]
-    DV = 10  # [m/s]
-    DR = 4 * np.pi  # [rad/s]
+    DV = 7.5  # [m/s]
+    DR = np.pi  # [rad/s]
 
     SUMMARY_FILE_PREFIX = "summary_"
     SUMMARY_DIR = "statistics"
