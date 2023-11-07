@@ -353,13 +353,74 @@ class SimulationAPI:
         )
         plt.show()
 
-    def summary(self, save: bool = False) -> None:
-        """Print a summary of the simulation.
+    def _compute_score(
+        self,
+        statistics: TrackStatistics
+    ) -> tuple[int, dict[str, [dict[str, float]]]]:
+        """Compute track simulation score from statistics.
 
         Args:
-            save (bool): whether to save the summary to a file. Defaults to
-                False.
+            statistics (TrackStatistics): track statistics.
+
+        Returns:
+            tuple[int, dict[str, [dict[str, float]]]]: tuple containing the
+                track completion status and a dictionary containing the
+                different scores and their pondered values.
         """
+        # Variable definition for later use:
+        waypoints = statistics.track.track.waypoints  # Track waypoints.
+        positions = statistics.positions  # Drone positions during simulation.
+        max_sp = self.drone.SPEED_RANGE[1]  # Max drone speeed.
+
+        # Track Distance (TD):
+        min_td = sum([
+            distance3D(waypoints[i], waypoints[i+1])
+            for i in range(len(waypoints) - 1)
+        ])
+        max_td = 2 * min_td
+        td = sum([
+            distance3D(positions[i], positions[i+1])
+            for i in range(len(positions) - 1)
+        ])
+
+        # Distance To End (DTE):
+        max_tte = max_sp / self.DV  # Max time to end.
+        min_dte = 0
+        max_dte = max_sp * max_tte - .5 * self.DV * max_tte ** 2
+        dte = statistics.distance_to_end
+
+        # Track Time (TT):
+        min_tt = max_td / max_sp + min_dte
+        max_tt = (max_td / self.DV + max_tte) * 2
+        tt = len(statistics.positions) * self.DT
+
+        # Pondered score:
+        return (
+            int(statistics.is_completed),
+            {
+                "Distance to end (DTE)": {
+                    "weight": 0.4,
+                    "value": 1 - (
+                        min(dte - min_dte, max_dte - min_dte)
+                        / (max_dte - min_dte)
+                    )
+                },
+                "Track distance (TD)": {
+                    "weight": 0.25,
+                    "value": 1 - (
+                        min(td - min_td, max_td - min_td)
+                        / (max_td - min_td)
+                    )
+                },
+                "Track Time (TT)": {
+                    "weight": 0.35,
+                    "value": 1 - (
+                        min(tt - min_tt, max_tt - min_tt)
+                        / (max_tt - min_tt)
+                    )
+                }
+            } if statistics.is_completed else {}
+        )
         header = f"{' Simulation summary ':=^80}"
         track = [
             f"""{' Track ' + str(i) + ' ':-^80}
