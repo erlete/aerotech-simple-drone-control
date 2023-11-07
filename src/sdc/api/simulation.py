@@ -421,7 +421,36 @@ class SimulationAPI:
                 }
             } if statistics.is_completed else {}
         )
+
+    def summary(self) -> None:
+        """Print a summary of the simulation."""
         header = f"{' Simulation summary ':=^80}"
+
+        rng = list(range(1, len(self._completed_statistics) + 1))
+        rng = [i / sum(rng) for i in rng]
+
+        # This is absolutely crazy. Please, future me, fix it ASAP.
+        scores = [
+            (
+                "DNF" if not score[0]
+                else f"(track weight: {rng[i] * 100:.2f}%)\n{' ' * 8}"
+                + f"\n{' ' * 8}".join([
+                    f"> {k} (weight: {v['weight'] * 100:.2f}%):"
+                    + f" {v['value'] * 100:.2f}%"
+                    for k, v in score[1].items()
+                ])
+            )
+            + f"\n{' ' * 4}> Total score (pondered): "
+            + f"""{sum([
+                v['weight'] * v['value']
+                for v in score[1].values()
+            ]) * 100:.2f}%"""
+            for i, score in enumerate([
+                self._compute_score(s)
+                for s in self._completed_statistics
+            ])
+        ]
+
         track = [
             f"""{' Track ' + str(i) + ' ':-^80}
     > Completed: {s.is_completed}
@@ -429,7 +458,19 @@ class SimulationAPI:
     > Max speed: {max(s.speeds):.5f} m/s
     > Min speed: {min(s.speeds):.5f} m/s
     > Average speed: {np.mean(s.speeds):.5f} m/s
+    > Scores: {scores[i-1]}
 """ for i, s in enumerate(self._completed_statistics, start=1)
+        ]
+
+        pondered_scores = [
+            sum([
+                v['weight'] * v['value']
+                for v in score[1].values()
+                if score[0]
+            ]) for score in [
+                self._compute_score(s)
+                for s in self._completed_statistics
+            ]
         ]
 
         overall = f"""
@@ -447,6 +488,10 @@ class SimulationAPI:
     > Average speed: {
         np.mean([np.mean(s.speeds) for s in self._completed_statistics])
     :.5f} m/s
+    > Score: {sum([
+        rng[i] * pondered_scores[i]
+        for i, _ in enumerate(rng)
+    ]) * 100:.2f}%
 """
 
         footer = "=" * 80
