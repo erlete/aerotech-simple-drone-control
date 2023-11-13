@@ -426,27 +426,35 @@ class SimulationAPI:
         """Print a summary of the simulation."""
         header = f"{' Simulation summary ':=^80}"
 
-        rng = [
-            i / sum(rng)
-            for i in range(1, len(self._completed_statistics) + 1)
+        # Track weight computation:
+        weight_range = range(1, len(self._completed_statistics) + 1)
+        track_weights = [
+            i / sum(weight_range)
+            for i in weight_range
         ]
 
-        # This is absolutely crazy. Please, future me, fix it ASAP.
         scores = [
             (
+                # Partial scores: DNF or track weight and area scores.
                 "DNF" if not score[0]
-                else f"(track weight: {rng[i] * 100:.2f}%)\n{' ' * 8}"
-                + f"\n{' ' * 8}".join([
-                    f"> {k} (weight: {v['weight'] * 100:.2f}%):"
-                    + f" {v['value'] * 100:.2f}%"
-                    for k, v in score[1].items()
-                ])
+                else (
+                    f"(track weight: {track_weights[i] * 100:.2f}%)\n{' ' * 8}"
+                    + f"\n{' ' * 8}".join([
+                        f"> {k} (weight: {v['weight'] * 100:.2f}%):"
+                        + f" {v['value'] * 100:.2f}%"
+                        for k, v in score[1].items()
+                    ])
+                )
             )
+
+            # Total score.
             + f"\n{' ' * 4}> Total score (pondered): "
             + f"""{sum([
                 v['weight'] * v['value']
                 for v in score[1].values()
             ]) * 100:.2f}%"""
+
+            # For each track statistics.
             for i, score in enumerate([
                 self._compute_score(s)
                 for s in self._completed_statistics
@@ -454,14 +462,14 @@ class SimulationAPI:
         ]
 
         track = [
-            f"""{' Track ' + str(i) + ' ':-^80}
-    > Completed: {s.is_completed}
-    > Distance to end: {s.distance_to_end:.5f} m
-    > Max speed: {max(s.speeds):.5f} m/s
-    > Min speed: {min(s.speeds):.5f} m/s
-    > Average speed: {np.mean(s.speeds):.5f} m/s
-    > Scores: {scores[i-1]}
-""" for i, s in enumerate(self._completed_statistics, start=1)
+            f"{' Track ' + str(i) + ' ':-^80}\n{' ' * 4}"
+            + f"> Completed: {s.is_completed}\n{' ' * 4}"
+            + f"> Distance to end: {s.distance_to_end:.5f} m\n{' ' * 4}"
+            + f"> Max speed: {max(s.speeds):.5f} m/s\n{' ' * 4}"
+            + f"> Min speed: {min(s.speeds):.5f} m/s\n{' ' * 4}"
+            + f"> Average speed: {np.mean(s.speeds):.5f} m/s\n{' ' * 4}"
+            + f"> Scores: {scores[i-1]}\n"
+            for i, s in enumerate(self._completed_statistics, start=1)
         ]
 
         pondered_scores = [
@@ -491,8 +499,8 @@ class SimulationAPI:
         np.mean([np.mean(s.speeds) for s in self._completed_statistics])
     :.5f} m/s
     > Score: {sum([
-        rng[i] * pondered_scores[i]
-        for i, _ in enumerate(rng)
+        track_weights[i] * pondered_scores[i]
+        for i, _ in enumerate(track_weights)
     ]) * 100:.2f}%
 """
 
