@@ -29,7 +29,7 @@ class TrackStatistics:
         # Automatically generated attributes:
         self._is_completed = False
         self._distance_to_end = 0.0
-        self._data = [(Vector3D(), Rotator3D(), 0.0)]  # Initial data.
+        self._data = [(track.track.start, Rotator3D(), 0.0)]  # Initial data.
 
     @property
     def track(self) -> TrackAPI:
