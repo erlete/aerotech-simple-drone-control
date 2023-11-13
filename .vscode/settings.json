@@ -4,5 +4,6 @@
         "-vv", "-s", "--color=yes", "src/sdc/tests"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "explorer.excludeGitIgnore": true
 }

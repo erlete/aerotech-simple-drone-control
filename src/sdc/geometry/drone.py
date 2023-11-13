@@ -104,13 +104,8 @@ class Drone:
         Args:
             ax (Axes3D): ax to plot drone on.
         """
-        a = np.array([
-            [-1, 1],
-            [-1, 1]
-        ])
-        ax.plot_surface(
-            a,a,a
-        )
+        print("Warning: Drone.plot() has not been implemented yet.")
+        return None
 
     def __repr__(self) -> str:
         """Get short drone representation.

@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "stable" ]
   pull_request:
-    branches: [ "stable" ]
+    branches: [ "stable", "dev" ]
 
 permissions:
   contents: read
