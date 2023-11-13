@@ -344,11 +344,11 @@ class SimulationAPI:
         ax1.set_title("3D Flight visualization")
         ax1.set_xlabel("X [m]")
         ax1.set_ylabel("Y [m]")
-        ax1.set_zlabel("Z [m]")
+        ax1.set_zlabel("Z [m]")  # type: ignore
 
         # Figure configuration:
         plt.tight_layout()
-        plt.get_current_fig_manager().window.state(
+        plt.get_current_fig_manager().window.state(  # type: ignore
             "zoomed" if fullscreen else "normal"
         )
         plt.show()
@@ -426,8 +426,10 @@ class SimulationAPI:
         """Print a summary of the simulation."""
         header = f"{' Simulation summary ':=^80}"
 
-        rng = list(range(1, len(self._completed_statistics) + 1))
-        rng = [i / sum(rng) for i in rng]
+        rng = [
+            i / sum(rng)
+            for i in range(1, len(self._completed_statistics) + 1)
+        ]
 
         # This is absolutely crazy. Please, future me, fix it ASAP.
         scores = [
