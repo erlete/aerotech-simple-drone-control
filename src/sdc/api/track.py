@@ -32,7 +32,7 @@ class TrackAPI:
     """
 
     REACHED_THRESHOLD = 1  # [m]
-    MIN_TIMEOUT_SPEED = 5  # [m/s]
+    MIN_TIMEOUT_SPEED = DroneAPI.SPEED_RANGE[1] / 4  # [m/s]
 
     def __init__(self, track: Track) -> None:
         """Initialize a TrackAPI instance.
