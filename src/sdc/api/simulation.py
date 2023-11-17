@@ -14,6 +14,8 @@ from time import perf_counter as pc
 
 import matplotlib.pyplot as plt
 import numpy as np
+from colorama import Fore, Style
+from scoretree import Score, ScoreArea, ScoreTree
 
 from ..core.gradient import ColorGradient
 from ..core.vector import Rotator3D, Vector3D, distance3D
@@ -356,16 +358,15 @@ class SimulationAPI:
     def _compute_score(
         self,
         statistics: TrackStatistics
-    ) -> tuple[int, dict[str, [dict[str, float]]]]:
+    ) -> tuple[bool, list[Score]]:
         """Compute track simulation score from statistics.
 
         Args:
             statistics (TrackStatistics): track statistics.
 
         Returns:
-            tuple[int, dict[str, [dict[str, float]]]]: tuple containing the
-                track completion status and a dictionary containing the
-                different scores and their pondered values.
+            tuple[bool, list[Score]]: list containing track completion flag and
+                list of scores on each weighted area.
         """
         # Variable definition for later use:
         waypoints = statistics.track.track.waypoints  # Track waypoints.
@@ -396,36 +397,35 @@ class SimulationAPI:
 
         # Pondered score:
         return (
-            int(statistics.is_completed),
-            {
-                "Distance to end (DTE)": {
-                    "weight": 0.4,
-                    "value": 1 - (
-                        min(dte - min_dte, max_dte - min_dte)
-                        / (max_dte - min_dte)
-                    )
-                },
-                "Track distance (TD)": {
-                    "weight": 0.25,
-                    "value": 1 - (
-                        min(td - min_td, max_td - min_td)
-                        / (max_td - min_td)
-                    )
-                },
-                "Track Time (TT)": {
-                    "weight": 0.35,
-                    "value": 1 - (
-                        min(tt - min_tt, max_tt - min_tt)
-                        / (max_tt - min_tt)
-                    )
-                }
-            } if statistics.is_completed else {}
+            statistics.is_completed,
+            [
+                Score(
+                    name="Distance to end (DTE)",
+                    weight=0.4,
+                    score_range=(min_dte, max_dte),
+                    value=dte if statistics.is_completed else max_dte,
+                    inverse=True
+                ),
+
+                Score(
+                    name="Track distance (TD)",
+                    weight=0.25,
+                    score_range=(min_td, max_td),
+                    value=td if statistics.is_completed else max_td,
+                    inverse=True
+                ),
+                Score(
+                    name="Track Time (TT)",
+                    weight=0.35,
+                    score_range=(min_tt, max_tt),
+                    value=tt if statistics.is_completed else max_tt,
+                    inverse=True
+                )
+            ]
         )
 
     def summary(self) -> None:
         """Print a summary of the simulation."""
-        header = f"{' Simulation summary ':=^80}"
-
         # Track weight computation:
         weight_range = range(1, len(self._completed_statistics) + 1)
         track_weights = [
@@ -433,77 +433,25 @@ class SimulationAPI:
             for i in weight_range
         ]
 
-        scores = [
-            (
-                # Partial scores: DNF or track weight and area scores.
-                "DNF" if not score[0]
-                else (
-                    f"(track weight: {track_weights[i] * 100:.2f}%)\n{' ' * 8}"
-                    + f"\n{' ' * 8}".join([
-                        f"> {k} (weight: {v['weight'] * 100:.2f}%):"
-                        + f" {v['value'] * 100:.2f}%"
-                        for k, v in score[1].items()
-                    ])
-                )
+        # Score tree generation:
+        st = ScoreTree([ScoreArea("Simulation", 1, [
+            Score(f"Track {i + 1} (DNF)", 1, (0, 1), 0)
+            if not score[0] else
+            ScoreArea(f"Track {i + 1}", weight, score[1])
+            for (i, weight), score in zip(
+                enumerate(track_weights), [
+                    self._compute_score(stat)
+                    for stat in self._completed_statistics
+                ]
             )
+        ])], colorized=True)
 
-            # Total score.
-            + f"\n{' ' * 4}> Total score (pondered): "
-            + f"""{sum([
-                v['weight'] * v['value']
-                for v in score[1].values()
-            ]) * 100:.2f}%"""
-
-            # For each track statistics.
-            for i, score in enumerate([
-                self._compute_score(s)
-                for s in self._completed_statistics
-            ])
-        ]
-
-        track = [
-            f"{' Track ' + str(i) + ' ':-^80}\n{' ' * 4}"
-            + f"> Completed: {s.is_completed}\n{' ' * 4}"
-            + f"> Distance to end: {s.distance_to_end:.5f} m\n{' ' * 4}"
-            + f"> Max speed: {max(s.speeds):.5f} m/s\n{' ' * 4}"
-            + f"> Min speed: {min(s.speeds):.5f} m/s\n{' ' * 4}"
-            + f"> Average speed: {np.mean(s.speeds):.5f} m/s\n{' ' * 4}"
-            + f"> Scores: {scores[i-1]}\n"
-            for i, s in enumerate(self._completed_statistics, start=1)
-        ]
-
-        pondered_scores = [
-            sum([
-                v['weight'] * v['value']
-                for v in score[1].values()
-                if score[0]
-            ]) for score in [
-                self._compute_score(s)
-                for s in self._completed_statistics
-            ]
-        ]
-
-        overall = f"""
-{' Overall ':-^80}
-    > Total tracks: {(t := len(self._completed_statistics))}
-    > Completed tracks: {
-        (c := len([s for s in self._completed_statistics if s.is_completed]))
-    } ({c / t * 100:.2f}%)
-    > Max speed: {
-        max([max(s.speeds) for s in self._completed_statistics])
-    :.5f} m/s
-    > Min speed: {
-        min([min(s.speeds) for s in self._completed_statistics])
-    :.5f} m/s
-    > Average speed: {
-        np.mean([np.mean(s.speeds) for s in self._completed_statistics])
-    :.5f} m/s
-    > Score: {sum([
-        track_weights[i] * pondered_scores[i]
-        for i, _ in enumerate(track_weights)
-    ]) * 100:.2f}%
-"""
-
-        footer = "=" * 80
-
-        print(f"{header}\n{''.join(track).strip()}{overall}{footer}")
+        print(
+            Fore.BLUE + Style.BRIGHT
+            + " Simulation statistics ".center(80, "=")
+            + Style.RESET_ALL + "\n"
+            + str(st)
+            + Fore.BLUE + Style.BRIGHT + "\n"
+            + f" Total score: {st.score * 100:.2f}% ".center(80, "=")
+            + Style.RESET_ALL
+        )
