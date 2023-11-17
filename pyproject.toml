@@ -1,29 +1,46 @@
 [build-system]
 requires = [
-    "setuptools",
-    "matplotlib>=3.8.0",
-    "numpy>=1.26.1"
+    "setuptools"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "simple-drone-control"
-version = "1.0.0"
 description = "Simple drone control simulation that serves as API for more complex programs."
+version = "1.0.0"
+
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10.0"
+
 authors = [
-    {name = "Paulo Sanchez", email = "dev.szblzpaulo@gmail.com"}
+    {name = "Paulo Sanchez", email = "dev.szblzpaulo@gmail.com"},
+    {name = "Pablo Magarinos", email = "pablo.magarinos@outlook.com"}
 ]
 maintainers = [
     {name = "Paulo Sanchez", email = "dev.szblzpaulo@gmail.com"}
 ]
+
 classifiers = [
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent"
+]
+
+requires-python = ">=3.10.0"
+dependencies = [
+    "matplotlib==3.8.1",
+    "numpy==1.26.2"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==7.4.3",
+    "pytest-cov==4.1.0",
+    "pycodestyle==2.11.1",
+    "pydocstyle==6.3.0",
+    "mypy==1.7.0",
+    "flake8==6.1.0"
 ]
 
 [project.urls]
