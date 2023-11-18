@@ -47,3 +47,23 @@ test = [
 [project.urls]
 "Homepage" = "https://github.com/erlete/simple-drone-control"
 "Bug Tracker" = "https://github.com/erlete/simple-drone-control/issues"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "src/sdc"
+]
+console_output_style = "progress"
+log_level = 0
+log_cli = true
+addopts = [
+    "--color=yes",
+    "--capture=no",
+    "--cov-config=.coveragerc",
+    "--cov-report=html",
+    "--cov=src/sdc"
+]
+minversion = "7.4.2"
+required_plugins = [
+    "pytest-cov",
+    "pytest-html"
+]
