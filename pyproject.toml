@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "simple-drone-control"
 description = "Simple drone control simulation that serves as API for more complex programs."
-version = "1.0.0"
+version = "1.1.0"
 
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -38,6 +38,7 @@ dependencies = [
 test = [
     "pytest==7.4.3",
     "pytest-cov==4.1.0",
+    "pytest-html==4.1.1",
     "pycodestyle==2.11.1",
     "pydocstyle==6.3.0",
     "mypy==1.7.0",
